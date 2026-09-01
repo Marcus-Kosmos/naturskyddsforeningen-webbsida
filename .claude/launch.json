@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Vite Dev Server",
+      "runtimeExecutable": "/usr/local/bin/node",
+      "runtimeArgs": ["/Users/makrokosmos/Dev/Naturskyddsföreningen Webbsida/node_modules/.bin/vite"],
+      "port": 3000
+    },
+    {
+      "name": "Sanity Studio",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/makrokosmos/Dev/Naturskyddsföreningen Webbsida/studio",
+      "port": 3333
+    }
+  ]
+}
