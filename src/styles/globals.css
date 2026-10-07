@@ -1,7 +1,31 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap');
+@import "tailwindcss";
 
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* The Sanity Studio lives in ./studio; keep its sources out of class detection. */
+@source not "../../studio";
+
+/* Corner radii the site was designed with (Tailwind's defaults are 0.5rem / 0.75rem). */
+@theme {
+  --radius-lg: 0.625rem;
+  --radius-xl: 1.025rem;
+}
+
+/* Base colours (shadcn neutral theme). These used to exist only in the
+   precompiled src/index.css; they are the page defaults that `dark:` and
+   `reading` styles override. */
+@layer base {
+  * {
+    border-color: oklch(0.922 0 0);
+    outline-color: color-mix(in oklab, oklch(0.708 0 0) 50%, transparent);
+  }
+
+  body {
+    background-color: oklch(1 0 0);
+    color: oklch(0.145 0 0);
+  }
+}
 
 @keyframes fadeIn {
   from {
