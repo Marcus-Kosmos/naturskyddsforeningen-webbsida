@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import { ThemeProvider } from './components/ThemeProvider';
 import { SiteProvider } from './lib/cms/SiteProvider';
 import { Navigation } from './components/Navigation';
@@ -16,6 +17,9 @@ import { MembershipPage } from './pages/MembershipPage';
 import { AboutPage } from './pages/AboutPage';
 import { TopicPage } from './pages/TopicPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+
+// Loaded on demand: pulls in the rich-text renderer, which no other page needs.
+const ArticlePage = lazy(() => import('./pages/ArticlePage').then((m) => ({ default: m.ArticlePage })));
 
 const breadcrumbMap: Record<string, { label: string; parent?: string }> = {
   '/biologisk-mangfald': { label: 'Biologisk mångfald', parent: 'Lär dig mer' },
@@ -38,9 +42,12 @@ function AppContent() {
   }, [location.pathname]);
   const isHome = location.pathname === '/';
   const crumbInfo = breadcrumbMap[location.pathname];
+  const isArticle = location.pathname.startsWith('/nyheter/');
 
   const breadcrumbItems = isHome
     ? [{ label: 'Hem', href: '/' }]
+    : isArticle
+    ? [{ label: 'Hem', href: '/' }, { label: 'Nyheter', href: '/nyheter' }, { label: 'Artikel', href: location.pathname }]
     : crumbInfo
     ? [{ label: 'Hem', href: '/' }, { label: crumbInfo.label, href: location.pathname }]
     : [{ label: 'Hem', href: '/' }];
@@ -50,11 +57,19 @@ function AppContent() {
       <Navigation />
       <Breadcrumbs items={breadcrumbItems} />
       <main id="main-content" className="bg-gray-200 dark:bg-slate-900 reading:bg-gray-100">
+        <Suspense
+          fallback={
+            <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-label="Laddar">
+              <Loader2 className="w-8 h-8 animate-spin text-[#5A7C50]" />
+            </div>
+          }
+        >
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/biologisk-mangfald" element={<BiodiversityPage />} />
           <Route path="/klimat" element={<ClimatePage />} />
           <Route path="/nyheter" element={<NewsPage />} />
+          <Route path="/nyheter/:slug" element={<ArticlePage />} />
           <Route path="/bli-medlem" element={<MembershipPage />} />
           <Route path="/om-foreningen" element={<AboutPage />} />
           <Route path="/hav-och-vatten" element={<TopicPage topic="hav" />} />
@@ -64,6 +79,7 @@ function AppContent() {
           <Route path="/engagera-dig" element={<TopicPage topic="engagera" />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </Suspense>
       </main>
       <Footer />
       <ScrollToTop />

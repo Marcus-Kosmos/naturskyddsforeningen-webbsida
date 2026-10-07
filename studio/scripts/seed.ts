@@ -9,10 +9,12 @@
  * Requires `npx sanity login`. Safe to re-run: existing content is never overwritten.
  */
 import {createContext, onlyModules} from './seed/lib'
+import {seedNews} from './seed/news'
 import {seedSite} from './seed/site'
 
 const MODULES: Record<string, (ctx: ReturnType<typeof createContext>) => Promise<void>> = {
   site: seedSite,
+  news: seedNews,
 }
 
 async function main() {

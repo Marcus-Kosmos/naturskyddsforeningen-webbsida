@@ -41,6 +41,16 @@ export const structure = (S: StructureBuilder) =>
             .filter('_type == "article" && featured == true')
             .defaultOrdering([{field: 'publishedAt', direction: 'desc'}]),
         ),
+      // ── Evenemang ──────────────────────────────────────
+      S.listItem()
+        .title('Evenemang')
+        .schemaType('event')
+        .child(
+          S.documentList()
+            .title('Evenemang')
+            .filter('_type == "event"')
+            .defaultOrdering([{field: 'startDate', direction: 'asc'}]),
+        ),
       S.divider(),
       // ── Skribenter ─────────────────────────────────────
       S.listItem()
