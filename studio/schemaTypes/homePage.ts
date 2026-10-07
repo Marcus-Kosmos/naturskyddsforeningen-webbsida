@@ -4,8 +4,7 @@ export default defineType({
   name: 'homePage',
   title: 'Startsida',
   type: 'document',
-  // Singleton — prevent creating more than one
-  __experimental_actions: ['update', 'publish'],
+  // Singleton (id "homePage"); see structure.ts and sanity.config.ts.
   groups: [
     {name: 'hero', title: 'Hjältesektionen'},
   ],

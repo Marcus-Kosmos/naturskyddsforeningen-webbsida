@@ -4,6 +4,9 @@ import { Menu, X, Sun, Moon, BookOpen, Globe, Search, User, ChevronDown } from '
 import { useTheme } from './ThemeProvider';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { SearchModal } from './SearchModal';
+import { CmsLink } from '../lib/cms/CmsLink';
+import { useSite } from '../lib/cms/SiteProvider';
+import type { NavGroup } from '../lib/cms/types';
 const naturskyddsLogo = '/images/logos/naturskyddsforeningen-dark.png';
 const naturskyddsLogoLight = '/images/logos/naturskyddsforeningen-light.png';
 
@@ -12,6 +15,7 @@ export function Navigation() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { navigation } = useSite();
   
   // Hover delays for better UX
   const openDelayRef = useRef<NodeJS.Timeout | null>(null);
@@ -21,43 +25,6 @@ export function Navigation() {
   const dropdownRef = useClickOutside<HTMLDivElement>(() => {
     setActiveDropdown(null);
   });
-
-  const learnMoreItems = [
-    { label: 'Biologisk mångfald', href: '/biologisk-mangfald' },
-    { label: 'Hav och vatten', href: '/hav-och-vatten' },
-    { label: 'Hållbar konsumtion', href: '/hallbar-konsumtion' },
-    { label: 'Klimat och energi', href: '/klimat' },
-    { label: 'Jordbruk och mat', href: '/jordbruk-och-mat' },
-    { label: 'Skog och mark', href: '/skog-och-mark' },
-  ];
-
-  const engageItems = [
-    { label: 'Engagera dig', href: '/engagera-dig' },
-    { label: 'Nyheter', href: '/nyheter' },
-    { label: 'Bli medlem', href: '/bli-medlem' },
-    { label: 'Natursnokarna', href: '/engagera-dig' },
-    { label: 'Fältbiologerna', href: '/engagera-dig' },
-  ];
-
-  const aboutItems = [
-    { label: 'Om föreningen', href: '/om-foreningen' },
-    { label: 'Globalt arbete', href: '/om-foreningen' },
-    { label: 'Jobba här', href: '/om-foreningen' },
-    { label: 'Kontakta oss', href: '/om-foreningen' },
-    { label: 'Press', href: '/om-foreningen' },
-    { label: 'Bra Miljöval', href: '/om-foreningen' },
-    { label: 'Sveriges Natur', href: '/nyheter' },
-  ];
-
-  const supportItems = [
-    { label: 'Bli medlem', href: '/bli-medlem', highlight: true },
-    { label: 'Ge en gåva', href: '/bli-medlem' },
-    { label: 'Företag', href: '/bli-medlem' },
-    { label: 'Stora gåvor och filantropi', href: '/bli-medlem' },
-    { label: 'Testamente', href: '/bli-medlem' },
-    { label: 'Butik', href: '/bli-medlem' },
-    { label: 'Fler sätt att stödja oss', href: '/bli-medlem' },
-  ];
 
   const toggleTheme = () => {
     if (theme === 'light') {
@@ -136,143 +103,18 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
-            {/* Lär dig mer */}
-            <div 
-              className="relative"
-              onMouseEnter={() => handleMouseEnter('learn')}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                onClick={() => toggleDropdown('learn')}
-                onKeyDown={(e) => handleKeyDown(e, 'learn')}
-                className="flex items-center gap-1 px-4 py-2 text-gray-700 dark:text-gray-300 reading:text-gray-900 hover:text-[#5A7C50] dark:hover:text-[#8FA888] transition-colors text-[20px] font-normal font-bold"
-              >
-                Lär dig mer
-                <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'learn' ? 'rotate-180' : ''}`} />
-              </button>
-              {activeDropdown === 'learn' && (
-                <div 
-                  className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2"
-                  onMouseEnter={() => handleMouseEnter('learn')}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  {learnMoreItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      onClick={() => setActiveDropdown(null)}
-                      className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#5A7C50] dark:hover:text-[#8FA888] transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Engagera dig */}
-            <div 
-              className="relative"
-              onMouseEnter={() => handleMouseEnter('engage')}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                onClick={() => toggleDropdown('engage')}
-                onKeyDown={(e) => handleKeyDown(e, 'engage')}
-                className="flex items-center gap-1 px-4 py-2 text-gray-700 dark:text-gray-300 reading:text-gray-900 hover:text-[#5A7C50] dark:hover:text-[#8FA888] transition-colors text-[20px] font-normal font-bold"
-              >
-                Engagera dig
-                <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'engage' ? 'rotate-180' : ''}`} />
-              </button>
-              {activeDropdown === 'engage' && (
-                <div 
-                  className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2"
-                  onMouseEnter={() => handleMouseEnter('engage')}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  {engageItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      onClick={() => setActiveDropdown(null)}
-                      className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#5A7C50] dark:hover:text-[#8FA888] transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Om oss */}
-            <div 
-              className="relative"
-              onMouseEnter={() => handleMouseEnter('about')}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                onClick={() => toggleDropdown('about')}
-                onKeyDown={(e) => handleKeyDown(e, 'about')}
-                className="flex items-center gap-1 px-4 py-2 text-gray-700 dark:text-gray-300 reading:text-gray-900 hover:text-[#5A7C50] dark:hover:text-[#8FA888] transition-colors text-[20px] font-normal font-bold"
-              >
-                Om oss
-                <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'about' ? 'rotate-180' : ''}`} />
-              </button>
-              {activeDropdown === 'about' && (
-                <div 
-                  className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2"
-                  onMouseEnter={() => handleMouseEnter('about')}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  {aboutItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      onClick={() => setActiveDropdown(null)}
-                      className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#5A7C50] dark:hover:text-[#8FA888] transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Stöd oss - CTA */}
-            <div 
-              className="relative"
-              onMouseEnter={() => handleMouseEnter('support')}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                onClick={() => toggleDropdown('support')}
-                onKeyDown={(e) => handleKeyDown(e, 'support')}
-                className="flex items-center gap-1 px-4 py-2 bg-[#5A7C50] hover:bg-[#4A6741] text-white rounded-lg transition-colors text-[20px] font-bold"
-              >
-                Stöd oss
-                <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'support' ? 'rotate-180' : ''}`} />
-              </button>
-              {activeDropdown === 'support' && (
-                <div 
-                  className="absolute top-full right-0 mt-2 w-64 bg-[#5A7C50] dark:bg-[#4A6741] rounded-lg shadow-xl py-2"
-                  onMouseEnter={() => handleMouseEnter('support')}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  {supportItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      onClick={() => setActiveDropdown(null)}
-                      className={`block px-4 py-3 text-white hover:bg-[#4A6741] dark:hover:bg-[#3A5631] transition-colors border-b border-[#4A6741]/30 last:border-0 ${
-                        item.highlight ? 'font-semibold' : ''
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            {navigation.groups.map((group) => (
+              <DesktopGroup
+                key={group._key}
+                group={group}
+                isActive={activeDropdown === group._key}
+                onToggle={() => toggleDropdown(group._key)}
+                onKeyDown={(e) => handleKeyDown(e, group._key)}
+                onMouseEnter={() => handleMouseEnter(group._key)}
+                onMouseLeave={handleMouseLeave}
+                onNavigate={() => setActiveDropdown(null)}
+              />
+            ))}
           </nav>
 
           {/* Right side icons */}
@@ -333,107 +175,18 @@ export function Navigation() {
       {isMenuOpen && (
         <div className="lg:hidden border-t border-gray-200 dark:border-gray-800 reading:border-gray-300 bg-white dark:bg-gray-900 reading:bg-gray-50" style={{ fontFamily: "'Inter Tight', sans-serif" }}>
           <nav className="max-w-7xl mx-auto px-4 py-4 space-y-4">
-            {/* Learn More - Mobile */}
-            <div>
-              <button
-                onClick={() => toggleDropdown('learn-mobile')}
-                className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 reading:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 reading:hover:bg-gray-200 transition-colors"
-              >
-                Lär dig mer
-                <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'learn-mobile' ? 'rotate-180' : ''}`} />
-              </button>
-              {activeDropdown === 'learn-mobile' && (
-                <div className="pl-4 mt-2 space-y-1">
-                  {learnMoreItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      onClick={() => { setActiveDropdown(null); setIsMenuOpen(false); }}
-                      className="block px-4 py-2 text-gray-600 dark:text-gray-400 reading:text-gray-700 hover:text-[#5A7C50] dark:hover:text-[#8FA888]"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Engage - Mobile */}
-            <div>
-              <button
-                onClick={() => toggleDropdown('engage-mobile')}
-                className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 reading:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 reading:hover:bg-gray-200 transition-colors"
-              >
-                Engagera dig
-                <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'engage-mobile' ? 'rotate-180' : ''}`} />
-              </button>
-              {activeDropdown === 'engage-mobile' && (
-                <div className="pl-4 mt-2 space-y-1">
-                  {engageItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      onClick={() => { setActiveDropdown(null); setIsMenuOpen(false); }}
-                      className="block px-4 py-2 text-gray-600 dark:text-gray-400 reading:text-gray-700 hover:text-[#5A7C50] dark:hover:text-[#8FA888]"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* About - Mobile */}
-            <div>
-              <button
-                onClick={() => toggleDropdown('about-mobile')}
-                className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 reading:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 reading:hover:bg-gray-200 transition-colors"
-              >
-                Om oss
-                <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'about-mobile' ? 'rotate-180' : ''}`} />
-              </button>
-              {activeDropdown === 'about-mobile' && (
-                <div className="pl-4 mt-2 space-y-1">
-                  {aboutItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      onClick={() => { setActiveDropdown(null); setIsMenuOpen(false); }}
-                      className="block px-4 py-2 text-gray-600 dark:text-gray-400 reading:text-gray-700 hover:text-[#5A7C50] dark:hover:text-[#8FA888]"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Support CTA - Mobile */}
-            <div>
-              <button
-                onClick={() => toggleDropdown('support-mobile')}
-                className="flex items-center justify-between w-full px-4 py-3 bg-[#5A7C50] text-white rounded-lg transition-colors"
-              >
-                Stöd oss
-                <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'support-mobile' ? 'rotate-180' : ''}`} />
-              </button>
-              {activeDropdown === 'support-mobile' && (
-                <div className="mt-2 bg-[#5A7C50] rounded-lg overflow-hidden">
-                  {supportItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      onClick={() => { setActiveDropdown(null); setIsMenuOpen(false); }}
-                      className={`block px-4 py-3 text-white hover:bg-[#4A6741] transition-colors border-b border-[#4A6741]/30 last:border-0 ${
-                        item.highlight ? 'font-semibold' : ''
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            {navigation.groups.map((group) => (
+              <MobileGroup
+                key={group._key}
+                group={group}
+                isActive={activeDropdown === `${group._key}-mobile`}
+                onToggle={() => toggleDropdown(`${group._key}-mobile`)}
+                onNavigate={() => {
+                  setActiveDropdown(null);
+                  setIsMenuOpen(false);
+                }}
+              />
+            ))}
 
             {/* Mobile utility buttons */}
             <div className="border-t border-gray-200 dark:border-gray-800 reading:border-gray-300 pt-4 flex items-center justify-around">
@@ -473,5 +226,115 @@ export function Navigation() {
       {/* Search Modal */}
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>
+  );
+}
+
+interface DesktopGroupProps {
+  group: NavGroup;
+  isActive: boolean;
+  onToggle: () => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  onNavigate: () => void;
+}
+
+function DesktopGroup({ group, isActive, onToggle, onKeyDown, onMouseEnter, onMouseLeave, onNavigate }: DesktopGroupProps) {
+  const isCta = group.variant === 'cta';
+
+  return (
+    <div className="relative" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      <button
+        onClick={onToggle}
+        onKeyDown={onKeyDown}
+        className={
+          isCta
+            ? 'flex items-center gap-1 px-4 py-2 bg-[#5A7C50] hover:bg-[#4A6741] text-white rounded-lg transition-colors text-[20px] font-bold'
+            : 'flex items-center gap-1 px-4 py-2 text-gray-700 dark:text-gray-300 reading:text-gray-900 hover:text-[#5A7C50] dark:hover:text-[#8FA888] transition-colors text-[20px] font-normal font-bold'
+        }
+      >
+        {group.title}
+        <ChevronDown className={`w-4 h-4 transition-transform ${isActive ? 'rotate-180' : ''}`} />
+      </button>
+      {isActive && (
+        <div
+          className={
+            isCta
+              ? 'absolute top-full right-0 mt-2 w-64 bg-[#5A7C50] dark:bg-[#4A6741] rounded-lg shadow-xl py-2'
+              : 'absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2'
+          }
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+        >
+          {group.items.map((item) => (
+            <CmsLink
+              key={item._key ?? item.label}
+              link={item.link}
+              onClick={onNavigate}
+              className={
+                isCta
+                  ? `block px-4 py-3 text-white hover:bg-[#4A6741] dark:hover:bg-[#3A5631] transition-colors border-b border-[#4A6741]/30 last:border-0 ${
+                      item.highlight ? 'font-semibold' : ''
+                    }`
+                  : `block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-[#5A7C50] dark:hover:text-[#8FA888] transition-colors ${
+                      item.highlight ? 'font-semibold' : ''
+                    }`
+              }
+            >
+              {item.label}
+            </CmsLink>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface MobileGroupProps {
+  group: NavGroup;
+  isActive: boolean;
+  onToggle: () => void;
+  onNavigate: () => void;
+}
+
+function MobileGroup({ group, isActive, onToggle, onNavigate }: MobileGroupProps) {
+  const isCta = group.variant === 'cta';
+
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        className={
+          isCta
+            ? 'flex items-center justify-between w-full px-4 py-3 bg-[#5A7C50] text-white rounded-lg transition-colors'
+            : 'flex items-center justify-between w-full px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 reading:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 reading:hover:bg-gray-200 transition-colors'
+        }
+      >
+        {group.title}
+        <ChevronDown className={`w-4 h-4 transition-transform ${isActive ? 'rotate-180' : ''}`} />
+      </button>
+      {isActive && (
+        <div className={isCta ? 'mt-2 bg-[#5A7C50] rounded-lg overflow-hidden' : 'pl-4 mt-2 space-y-1'}>
+          {group.items.map((item) => (
+            <CmsLink
+              key={item._key ?? item.label}
+              link={item.link}
+              onClick={onNavigate}
+              className={
+                isCta
+                  ? `block px-4 py-3 text-white hover:bg-[#4A6741] transition-colors border-b border-[#4A6741]/30 last:border-0 ${
+                      item.highlight ? 'font-semibold' : ''
+                    }`
+                  : `block px-4 py-2 text-gray-600 dark:text-gray-400 reading:text-gray-700 hover:text-[#5A7C50] dark:hover:text-[#8FA888] ${
+                      item.highlight ? 'font-semibold' : ''
+                    }`
+              }
+            >
+              {item.label}
+            </CmsLink>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

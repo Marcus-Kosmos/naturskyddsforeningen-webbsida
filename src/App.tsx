@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ThemeProvider } from './components/ThemeProvider';
+import { SiteProvider } from './lib/cms/SiteProvider';
 import { Navigation } from './components/Navigation';
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -74,7 +75,9 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <SiteProvider>
+        <AppContent />
+      </SiteProvider>
     </ThemeProvider>
   );
 }
