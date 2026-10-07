@@ -268,7 +268,8 @@ export function LocalAssociationsModal({ isOpen, onClose }: LocalAssociationsMod
   if (!isOpen) return null;
 
   const regions = Object.keys(associations).sort();
-  const selectedAssociations = selectedRegion ? associations[selectedRegion] : [];
+  // Not every county on the map has an entry (e.g. Södermanland), so default to none.
+  const selectedAssociations = selectedRegion ? (associations[selectedRegion] ?? []) : [];
 
   return (
     <div className="fixed inset-0 z-[100] animate-fadeIn">

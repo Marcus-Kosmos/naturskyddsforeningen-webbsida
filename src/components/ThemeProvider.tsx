@@ -43,27 +43,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    
-    console.log('Setting theme to:', theme);
-    
+
     // Save user preference
     localStorage.setItem('theme', theme);
-    
-    // Remove all theme classes
+
+    // Remove all theme classes, then add the active one (light has none)
     root.classList.remove('dark', 'reading');
-    
-    // Add the appropriate class
     if (theme === 'dark') {
       root.classList.add('dark');
-      console.log('Added dark class');
     } else if (theme === 'reading') {
       root.classList.add('reading');
-      console.log('Added reading class');
-    } else {
-      console.log('Light mode - no class');
     }
-    
-    console.log('HTML classes:', root.className);
   }, [theme]);
 
   return (

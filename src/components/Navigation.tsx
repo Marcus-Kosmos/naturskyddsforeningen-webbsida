@@ -60,15 +60,11 @@ export function Navigation() {
   ];
 
   const toggleTheme = () => {
-    console.log('Current theme:', theme);
     if (theme === 'light') {
-      console.log('Switching to dark');
       setTheme('dark');
     } else if (theme === 'dark') {
-      console.log('Switching to reading');
       setTheme('reading');
     } else {
-      console.log('Switching to light');
       setTheme('light');
     }
   };
