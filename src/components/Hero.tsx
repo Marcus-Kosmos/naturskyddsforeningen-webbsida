@@ -1,7 +1,8 @@
 import { ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { client, urlFor } from '../lib/sanityClient';
+import { urlFor } from '../lib/sanityClient';
+import { useSanityQuery } from '../lib/cms/useSanityQuery';
 
 interface HeroImage {
   asset: { _ref: string };
@@ -29,11 +30,7 @@ const HOMEPAGE_QUERY = `*[_type == "homePage" && _id == "homePage"][0]{
 
 export function Hero() {
   const [currentImage, setCurrentImage] = useState(0);
-  const [cms, setCms] = useState<HomePageData | null>(null);
-
-  useEffect(() => {
-    client.fetch<HomePageData>(HOMEPAGE_QUERY).then(setCms).catch(() => {});
-  }, []);
+  const { data: cms } = useSanityQuery<HomePageData>(HOMEPAGE_QUERY);
 
   useEffect(() => {
     const interval = setInterval(() => {

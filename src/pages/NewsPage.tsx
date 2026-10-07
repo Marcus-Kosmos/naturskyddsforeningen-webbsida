@@ -115,14 +115,12 @@ export function NewsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [articles, setArticles] = useState<SanityArticle[]>(fallbackArticles as SanityArticle[]);
   const [loading, setLoading] = useState(true);
-  const [usingCms, setUsingCms] = useState(false);
 
   useEffect(() => {
     client.fetch<SanityArticle[]>(ARTICLES_QUERY)
       .then((data) => {
         if (data && data.length > 0) {
           setArticles(data);
-          setUsingCms(true);
         }
       })
       .catch(() => {
@@ -151,11 +149,6 @@ export function NewsPage() {
           <div className="flex items-center gap-3 mb-4">
             <h1 className="text-gray-900 dark:text-white">Nyheter</h1>
             {loading && <Loader2 className="w-5 h-5 animate-spin text-[#5A7C50]" />}
-            {!loading && usingCms && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#5A7C50]/10 text-[#5A7C50] dark:bg-[#5A7C50]/20 dark:text-[#8FA888] font-medium">
-                Live från CMS
-              </span>
-            )}
           </div>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mb-8">
             Håll dig uppdaterad om klimat, natur och miljöpolitik. Här samlar vi nyheter, rapporter och kampanjer.

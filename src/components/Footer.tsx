@@ -1,8 +1,8 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Youtube, Twitter } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LocalAssociationsModal } from './LocalAssociationsModal';
-import { client } from '../lib/sanityClient';
+import { useSanityQuery } from '../lib/cms/useSanityQuery';
 
 const naturskyddsLogo = '/images/logos/naturskyddsforeningen-dark.png';
 const naturskyddsLogoLight = '/images/logos/naturskyddsforeningen-light.png';
@@ -27,11 +27,7 @@ const SETTINGS_QUERY = `*[_type == "siteSettings" && _id == "siteSettings"][0]{
 
 export function Footer() {
   const [isLocalAssociationsOpen, setIsLocalAssociationsOpen] = useState(false);
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
-
-  useEffect(() => {
-    client.fetch<SiteSettings>(SETTINGS_QUERY).then(setSettings).catch(() => {});
-  }, []);
+  const { data: settings } = useSanityQuery<SiteSettings>(SETTINGS_QUERY);
 
   const tagline = settings?.tagline || 'Sveriges största miljöorganisation sedan 1909.';
   const email = settings?.contactEmail || 'info@naturskyddsforeningen.se';
