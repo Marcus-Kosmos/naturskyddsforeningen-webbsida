@@ -54,6 +54,8 @@ export default defineConfig({
     outDir: 'build',
   },
   server: {
+    // The Sanity Studio lives in ./studio and rebuilds on its own; don't reload the site for it.
+    watch: { ignored: ['**/studio/**'] },
     port: 3000,
     open: true,
   },

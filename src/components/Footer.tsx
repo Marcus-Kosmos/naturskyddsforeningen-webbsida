@@ -1,54 +1,21 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Youtube, Twitter } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { LocalAssociationsModal } from './LocalAssociationsModal';
-import { useSanityQuery } from '../lib/cms/useSanityQuery';
+import { CmsLink } from '../lib/cms/CmsLink';
+import { useSite } from '../lib/cms/SiteProvider';
 
 const naturskyddsLogo = '/images/logos/naturskyddsforeningen-dark.png';
 const naturskyddsLogoLight = '/images/logos/naturskyddsforeningen-light.png';
 
-interface SiteSettings {
-  tagline?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  contactAddressLine1?: string;
-  contactAddressLine2?: string;
-  facebook?: string;
-  instagram?: string;
-  youtube?: string;
-  twitter?: string;
-}
-
-const SETTINGS_QUERY = `*[_type == "siteSettings" && _id == "siteSettings"][0]{
-  tagline, contactEmail, contactPhone,
-  contactAddressLine1, contactAddressLine2,
-  facebook, instagram, youtube, twitter
-}`;
-
 export function Footer() {
   const [isLocalAssociationsOpen, setIsLocalAssociationsOpen] = useState(false);
-  const { data: settings } = useSanityQuery<SiteSettings>(SETTINGS_QUERY);
-
-  const tagline = settings?.tagline || 'Sveriges största miljöorganisation sedan 1909.';
-  const email = settings?.contactEmail || 'info@naturskyddsforeningen.se';
-  const phone = settings?.contactPhone || '08-702 65 00';
-  const addr1 = settings?.contactAddressLine1 || 'Box 4625';
-  const addr2 = settings?.contactAddressLine2 || '116 91 Stockholm';
-
-  const quickLinks = [
-    { label: 'Om föreningen', href: '/om-foreningen' },
-    { label: 'Nyheter', href: '/nyheter' },
-    { label: 'Bli medlem', href: '/bli-medlem' },
-    { label: 'Klimat och energi', href: '/klimat' },
-    { label: 'Biologisk mångfald', href: '/biologisk-mangfald' },
-  ];
-
-  const resources = [
-    { label: 'Hav och vatten', href: '/hav-och-vatten' },
-    { label: 'Skog och mark', href: '/skog-och-mark' },
-    { label: 'Hållbar konsumtion', href: '/hallbar-konsumtion' },
-    { label: 'Jordbruk och mat', href: '/jordbruk-och-mat' },
-  ];
+  const { settings, navigation, fill } = useSite();
+  const { footer } = settings;
+  const tagline = settings.tagline;
+  const email = settings.contactEmail;
+  const phone = settings.contactPhone;
+  const addr1 = settings.contactAddressLine1;
+  const addr2 = settings.contactAddressLine2;
 
   return (
     <footer className="bg-gray-900 dark:bg-black reading:bg-white reading:border-t reading:border-gray-300 text-white dark:text-gray-300 reading:text-gray-900 pt-12 pb-6 reading:max-w-3xl reading:mx-auto">
@@ -74,25 +41,25 @@ export function Footer() {
             </p>
             <div className="flex gap-3">
               <a
-                href={settings?.facebook || '#facebook'}
+                href={settings.facebook || '#facebook'}
                 className="w-9 h-9 bg-gray-800 dark:bg-gray-900 reading:bg-gray-200 rounded-lg flex items-center justify-center hover:bg-[#5A7C50] dark:hover:bg-[#6B8E65] reading:hover:bg-gray-300 transition-colors"
               >
                 <Facebook className="w-4 h-4" />
               </a>
               <a
-                href={settings?.instagram || '#instagram'}
+                href={settings.instagram || '#instagram'}
                 className="w-9 h-9 bg-gray-800 dark:bg-gray-900 reading:bg-gray-200 rounded-lg flex items-center justify-center hover:bg-[#5A7C50] dark:hover:bg-[#6B8E65] reading:hover:bg-gray-300 transition-colors"
               >
                 <Instagram className="w-4 h-4" />
               </a>
               <a
-                href={settings?.youtube || '#youtube'}
+                href={settings.youtube || '#youtube'}
                 className="w-9 h-9 bg-gray-800 dark:bg-gray-900 reading:bg-gray-200 rounded-lg flex items-center justify-center hover:bg-[#5A7C50] dark:hover:bg-[#6B8E65] reading:hover:bg-gray-300 transition-colors"
               >
                 <Youtube className="w-4 h-4" />
               </a>
               <a
-                href={settings?.twitter || '#twitter'}
+                href={settings.twitter || '#twitter'}
                 className="w-9 h-9 bg-gray-800 dark:bg-gray-900 reading:bg-gray-200 rounded-lg flex items-center justify-center hover:bg-[#5A7C50] dark:hover:bg-[#6B8E65] reading:hover:bg-gray-300 transition-colors"
               >
                 <Twitter className="w-4 h-4" />
@@ -100,43 +67,26 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="mb-4 text-white reading:text-gray-900">
-              Snabblänkar
-            </h3>
-            <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.href}
-                    className="text-gray-400 dark:text-gray-500 reading:text-gray-700 hover:text-[#8FA888] dark:hover:text-[#8FA888] reading:hover:text-gray-900 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h3 className="mb-4 text-white reading:text-gray-900">
-              Resurser
-            </h3>
-            <ul className="space-y-2">
-              {resources.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.href}
-                    className="text-gray-400 dark:text-gray-500 reading:text-gray-700 hover:text-[#8FA888] dark:hover:text-[#8FA888] reading:hover:text-gray-900 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Link columns */}
+          {navigation.footerColumns.map((column) => (
+            <div key={column._key}>
+              <h3 className="mb-4 text-white reading:text-gray-900">
+                {column.title}
+              </h3>
+              <ul className="space-y-2">
+                {column.links.map((link) => (
+                  <li key={link._key ?? link.label}>
+                    <CmsLink
+                      link={link.link}
+                      className="text-gray-400 dark:text-gray-500 reading:text-gray-700 hover:text-[#8FA888] dark:hover:text-[#8FA888] reading:hover:text-gray-900 transition-colors"
+                    >
+                      {link.label}
+                    </CmsLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
 
           {/* Contact */}
           <div>
@@ -174,10 +124,10 @@ export function Footer() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <h3 className="text-white reading:text-gray-900 mb-1">
-                Hitta din lokalförening
+                {fill(footer.associationsHeading)}
               </h3>
               <p className="text-white/90 reading:text-gray-700">
-                Vi finns i alla Sveriges län. Engagera dig lokalt!
+                {fill(footer.associationsText)}
               </p>
             </div>
             <button
@@ -185,7 +135,7 @@ export function Footer() {
               className="px-6 py-3 bg-white dark:bg-gray-900 reading:bg-[#5A7C50] text-[#5A7C50] dark:text-white reading:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 reading:hover:bg-[#4A6741] transition-colors flex items-center gap-2 whitespace-nowrap"
             >
               <MapPin className="w-5 h-5" />
-              Välj ditt län
+              {fill(footer.associationsButton)}
             </button>
           </div>
         </div>
@@ -194,22 +144,22 @@ export function Footer() {
         <div className="pt-6 border-t border-gray-800 dark:border-gray-800 reading:border-gray-300">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 dark:text-gray-500 reading:text-gray-600">
-              © 2025 Naturskyddsföreningen. Org.nr 802003-1855
+              {fill(footer.copyright)}
+              {footer.orgNumber ? ` Org.nr ${footer.orgNumber}` : ''}
             </p>
-            <div className="flex gap-6">
-              <a
-                href="#integritet"
-                className="text-gray-400 dark:text-gray-500 reading:text-gray-700 hover:text-[#8FA888] dark:hover:text-[#8FA888] reading:hover:text-gray-900 transition-colors"
-              >
-                Integritetspolicy
-              </a>
-              <a
-                href="#cookies"
-                className="text-gray-400 dark:text-gray-500 reading:text-gray-700 hover:text-[#8FA888] dark:hover:text-[#8FA888] reading:hover:text-gray-900 transition-colors"
-              >
-                Cookies
-              </a>
-            </div>
+            {footer.legalLinks.length > 0 && (
+              <div className="flex gap-6">
+                {footer.legalLinks.map((link) => (
+                  <CmsLink
+                    key={link._key ?? link.label}
+                    link={link.link}
+                    className="text-gray-400 dark:text-gray-500 reading:text-gray-700 hover:text-[#8FA888] dark:hover:text-[#8FA888] reading:hover:text-gray-900 transition-colors"
+                  >
+                    {link.label}
+                  </CmsLink>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
