@@ -11,7 +11,7 @@
       "name": "Sanity Studio",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "cwd": "/Users/makrokosmos/Dev/Naturskyddsföreningen Webbsida/studio",
+      "cwd": "studio",
       "port": 3333
     }
   ]
