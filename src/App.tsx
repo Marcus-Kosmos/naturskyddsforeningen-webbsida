@@ -38,6 +38,15 @@ const breadcrumbMap: Record<string, { label: string; parent?: string }> = {
   '/engagera-dig': { label: 'Engagera dig' },
 };
 
+// matchPath leaves the segment percent-encoded; the route's useParams decodes it.
+function decodeSegment(segment: string) {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
 function AppContent() {
   const location = useLocation();
   const navigationType = useNavigationType();
@@ -50,7 +59,8 @@ function AppContent() {
   const crumbInfo = breadcrumbMap[location.pathname];
 
   // Shares its request with ArticlePage (same query and params, so one fetch).
-  const articleSlug = matchPath('/nyheter/:slug', location.pathname)?.params.slug;
+  const rawSlug = matchPath('/nyheter/:slug', location.pathname)?.params.slug;
+  const articleSlug = rawSlug && decodeSegment(rawSlug);
   const { data: article, loading: articleLoading, error: articleError } = useSanityQuery<ArticleFull>(
     articleSlug ? ARTICLE_QUERY : null,
     { slug: articleSlug },

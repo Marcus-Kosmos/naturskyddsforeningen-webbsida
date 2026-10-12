@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Calendar, Tag, ArrowRight, Search, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -14,9 +15,9 @@ const fadeUp = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.06 } }),
 };
 
-// The card clips its children (overflow-hidden), so the keyboard focus ring is drawn inside the edge.
-// The "!" is needed: the global *:focus-visible rule isn't in a CSS layer, so it beats plain utilities.
-const CARD_LINK = 'block rounded-2xl focus-visible:outline-offset-[-3px]!';
+// The link fills the card, so its focus ring follows the card's corners. The card itself must not
+// clip (no overflow-hidden), or the ring would be cut off; only the image area clips its hover zoom.
+const CARD_LINK = 'block rounded-2xl';
 
 // Display order for the filter chips; only categories that have articles are shown.
 // Keep in sync with the category list in studio/schemaTypes/article.ts.
@@ -51,7 +52,8 @@ function ArticleImage({
 export function NewsPage() {
   // Filter and search live in the URL, so Back from an article returns to the same view.
   const [params, setParams] = useSearchParams();
-  const searchQuery = params.get('q') ?? '';
+  // The search box keeps its own state: an input controlled by the URL loses its caret position while typing.
+  const [searchQuery, setSearchQuery] = useState(() => params.get('q') ?? '');
   const { data, loading, error } = useSanityQuery<ArticleCard[]>(ARTICLES_QUERY);
   const articles = data ?? [];
 
@@ -71,16 +73,20 @@ export function NewsPage() {
   const requestedCategory = params.get('kategori') ?? 'Alla';
   const activeCategory = loading || categories.includes(requestedCategory) ? requestedCategory : 'Alla';
 
-  const updateParam = (name: 'kategori' | 'q', value: string) =>
-    setParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        if (value && value !== 'Alla') next.set(name, value);
-        else next.delete(name);
-        return next;
-      },
-      { replace: true },
-    );
+  const updateParam = (name: 'kategori' | 'q', value: string) => {
+    // Start from the live URL; the router's copy of it can lag a render behind.
+    const next = new URLSearchParams(window.location.search);
+    if (value && !(name === 'kategori' && value === 'Alla')) next.set(name, value);
+    else next.delete(name);
+    setParams(next, { replace: true });
+  };
+
+  // The URL follows the search box a moment after typing stops.
+  useEffect(() => {
+    if ((new URLSearchParams(window.location.search).get('q') ?? '') === searchQuery) return;
+    const timer = setTimeout(() => updateParam('q', searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const filtered = articles.filter((a) => {
     const matchCat = activeCategory === 'Alla' || a.category === activeCategory;
@@ -112,7 +118,7 @@ export function NewsPage() {
               type="text"
               placeholder="Sök nyheter..."
               value={searchQuery}
-              onChange={(e) => updateParam('q', e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5A7C50]"
             />
           </div>
@@ -161,10 +167,10 @@ export function NewsPage() {
                       initial="hidden"
                       animate="visible"
                       variants={fadeUp}
-                      className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
+                      className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
                     >
                       <Link to={`/nyheter/${article.slug}`} className={CARD_LINK}>
-                      <div className="h-56 overflow-hidden">
+                      <div className="h-56 overflow-hidden rounded-t-2xl">
                         <ArticleImage article={article} width={800} height={448} sizes="(min-width: 1280px) 600px, (min-width: 768px) 50vw, 100vw" />
                       </div>
                       <div className="p-6">
@@ -200,10 +206,10 @@ export function NewsPage() {
                     initial="hidden"
                     animate="visible"
                     variants={fadeUp}
-                    className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
+                    className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
                   >
                     <Link to={`/nyheter/${article.slug}`} className={CARD_LINK}>
-                    <div className="h-40 overflow-hidden">
+                    <div className="h-40 overflow-hidden rounded-t-2xl">
                       <ArticleImage article={article} width={500} height={320} sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" />
                     </div>
                     <div className="p-5">

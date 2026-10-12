@@ -1,7 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface Props {
-  /** When this changes (the pathname, say) a shown error is cleared so the next page gets a fresh try. */
+  /** When this changes (the pathname, say) a shown error is cleared, so other pages render again. */
   resetKey: string;
   children: ReactNode;
 }
@@ -54,10 +54,10 @@ export class RouteErrorBoundary extends Component<Props, State> {
       <section className="min-h-[60vh] bg-white py-20 text-center dark:bg-slate-900">
         <div className="mx-auto max-w-md px-4">
           <h1 className="mb-4 text-gray-900 dark:text-white">Något gick fel</h1>
-          <p className="mb-6 text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400">
             Sidan kunde inte visas. Ladda om sidan, eller gå tillbaka till startsidan.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="mt-6 flex flex-wrap justify-center gap-4">
             <button
               type="button"
               onClick={() => window.location.reload()}

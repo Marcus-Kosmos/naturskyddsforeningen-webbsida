@@ -83,7 +83,7 @@ const components: PortableTextComponents = {
       // Not a heading: it would skip levels in articles that have no h2 before it.
       <div role="note" className="my-8 rounded-xl border border-[#5A7C50]/30 bg-[#5A7C50]/10 p-6 dark:bg-[#5A7C50]/20">
         {value?.heading && (
-          <p className="mb-2 mt-0 text-xl font-semibold text-gray-900 dark:text-white">{value.heading}</p>
+          <div className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">{value.heading}</div>
         )}
         {value?.text && <p className="mb-0 whitespace-pre-line text-gray-700 dark:text-gray-300">{value.text}</p>}
       </div>
