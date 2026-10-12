@@ -44,7 +44,8 @@ export function CmsImage({ image, alt = '', width, height, sizes, className, loa
 
   const build = (w: number) => {
     let builder = urlFor(image).width(w).auto('format')
-    if (height) builder = builder.height(Math.round((height * w) / width)).fit('crop')
+    // Never upscale: a candidate wider than the original just returns the original.
+    builder = height ? builder.height(Math.round((height * w) / width)).fit('crop') : builder.fit('max')
     return builder.url()
   }
 

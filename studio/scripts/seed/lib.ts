@@ -1,3 +1,5 @@
+import {readFile} from 'node:fs/promises'
+import path from 'node:path'
 import {getCliClient} from 'sanity/cli'
 
 export type SanityClient = ReturnType<typeof getCliClient>
@@ -103,4 +105,28 @@ export const unsplash = (id: string) => `https://images.unsplash.com/${id}?w=200
 export function keyMaker(prefix: string) {
   let n = 0
   return () => `${prefix}-${++n}`
+}
+
+/**
+ * Upload a file from the repo's public/ folder as a Sanity image asset (deduplicated by hash).
+ * `relativePath` is relative to public/, for example "images/logos/sveriges-natur-dark.png".
+ * Run seeds from studio/ (as the docs say) so ../public resolves. Returns null if the file is gone.
+ */
+export async function uploadPublicImage(
+  ctx: SeedContext,
+  relativePath: string,
+  fields: {alt?: string; caption?: string} = {},
+  type: 'image' | 'captionedImage' = 'captionedImage',
+) {
+  const file = path.resolve(process.cwd(), '..', 'public', relativePath)
+  let buffer: Buffer
+  try {
+    buffer = await readFile(file)
+  } catch {
+    // These images now live in Sanity; a fresh dataset just gets none until they are uploaded in Studio.
+    console.warn(`  (skipped ${relativePath}: no longer in the repo)`)
+    return null
+  }
+  const asset = await ctx.client.assets.upload('image', buffer, {filename: path.basename(file)})
+  return {_type: type, asset: {_type: 'reference', _ref: asset._id}, ...fields}
 }

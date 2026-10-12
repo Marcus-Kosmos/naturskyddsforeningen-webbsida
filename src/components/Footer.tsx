@@ -1,14 +1,13 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Youtube, Twitter } from 'lucide-react';
-import { useState } from 'react';
-import { LocalAssociationsModal } from './LocalAssociationsModal';
 import { CmsLink } from '../lib/cms/CmsLink';
+import { useAssociations } from '../lib/cms/AssociationsProvider';
 import { useSite } from '../lib/cms/SiteProvider';
 
 const naturskyddsLogo = '/images/logos/naturskyddsforeningen-dark.png';
 const naturskyddsLogoLight = '/images/logos/naturskyddsforeningen-light.png';
 
 export function Footer() {
-  const [isLocalAssociationsOpen, setIsLocalAssociationsOpen] = useState(false);
+  const associations = useAssociations();
   const { settings, navigation, fill } = useSite();
   const { footer } = settings;
   const tagline = settings.tagline;
@@ -131,7 +130,7 @@ export function Footer() {
               </p>
             </div>
             <button
-              onClick={() => setIsLocalAssociationsOpen(true)}
+              onClick={associations.open}
               className="px-6 py-3 bg-white dark:bg-gray-900 reading:bg-[#5A7C50] text-[#5A7C50] dark:text-white reading:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 reading:hover:bg-[#4A6741] transition-colors flex items-center gap-2 whitespace-nowrap"
             >
               <MapPin className="w-5 h-5" />
@@ -163,12 +162,6 @@ export function Footer() {
           </div>
         </div>
       </div>
-
-      {/* Local Associations Modal */}
-      <LocalAssociationsModal 
-        isOpen={isLocalAssociationsOpen} 
-        onClose={() => setIsLocalAssociationsOpen(false)} 
-      />
     </footer>
   );
 }

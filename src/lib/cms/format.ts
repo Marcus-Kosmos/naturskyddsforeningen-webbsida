@@ -12,6 +12,11 @@ export function formatDate(iso?: string | null): string {
   return toDate(iso)?.toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' }) ?? ''
 }
 
+/** "15 december" */
+export function formatDayMonth(iso?: string | null): string {
+  return toDate(iso)?.toLocaleDateString(LOCALE, { day: 'numeric', month: 'long' }) ?? ''
+}
+
 /** "15 dec" */
 export function formatShortDate(iso?: string | null): string {
   return toDate(iso)?.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' }).replace('.', '') ?? ''

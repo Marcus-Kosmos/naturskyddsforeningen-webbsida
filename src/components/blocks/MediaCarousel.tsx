@@ -1,45 +1,34 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CmsImage } from '../../lib/cms/image';
+import type { CmsImageData } from '../../lib/cms/types';
 
-interface ImageSlide {
-  src: string;
-  alt: string;
-  caption: string;
+interface MediaCarouselProps {
+  slides: CmsImageData[];
+  /** Layout width of the carousel, as an HTML `sizes` string, so phones get smaller files. */
+  sizes: string;
 }
 
-interface ImageCarouselProps {
-  slides: ImageSlide[];
-}
-
-export function ImageCarousel({ slides }: ImageCarouselProps) {
+/** A slideshow of captioned images with arrows, dots and a counter. */
+export function MediaCarousel({ slides, sizes }: MediaCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const current = slides[currentIndex] ?? slides[0];
 
-  const goToPrevious = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? slides.length - 1 : prevIndex - 1
-    );
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === slides.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
+  const goToPrevious = () => setCurrentIndex((index) => (index === 0 ? slides.length - 1 : index - 1));
+  const goToNext = () => setCurrentIndex((index) => (index === slides.length - 1 ? 0 : index + 1));
 
   return (
     <div className="relative group">
       {/* Main Image */}
       <div className="relative overflow-hidden rounded-2xl reading:rounded-none shadow-lg reading:shadow-none h-[32rem]">
-        <img
-          src={slides[currentIndex].src}
-          alt={slides[currentIndex].alt}
+        <CmsImage
+          image={current}
+          alt={current.alt}
+          width={1200}
+          sizes={sizes}
           className="w-full h-full object-cover transition-opacity duration-300"
         />
-        
+
         {/* Navigation Buttons */}
         {slides.length > 1 && (
           <>
@@ -57,21 +46,19 @@ export function ImageCarousel({ slides }: ImageCarouselProps) {
             >
               <ChevronRight className="w-6 h-6" />
             </button>
-          </>
-        )}
 
-        {/* Slide Counter */}
-        {slides.length > 1 && (
-          <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
-            {currentIndex + 1} / {slides.length}
-          </div>
+            {/* Slide Counter */}
+            <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+              {currentIndex + 1} / {slides.length}
+            </div>
+          </>
         )}
       </div>
 
       {/* Caption */}
-      <p className="text-gray-500 dark:text-gray-400 reading:text-gray-600 mt-2 italic">
-        {slides[currentIndex].caption}
-      </p>
+      {current.caption && (
+        <p className="text-gray-500 dark:text-gray-400 reading:text-gray-600 mt-2 italic">{current.caption}</p>
+      )}
 
       {/* Dots Navigation */}
       {slides.length > 1 && (
@@ -79,7 +66,7 @@ export function ImageCarousel({ slides }: ImageCarouselProps) {
           {slides.map((_, index) => (
             <button
               key={index}
-              onClick={() => goToSlide(index)}
+              onClick={() => setCurrentIndex(index)}
               aria-label={`Gå till bild ${index + 1}`}
               className={`w-2 h-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[#5A7C50] ${
                 index === currentIndex
