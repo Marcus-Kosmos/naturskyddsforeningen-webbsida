@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Calendar, Tag, Loader2 } from 'lucide-react';
 import { MembershipCTA } from '../components/MembershipCTA';
 import { ShareButtons } from '../components/ShareButtons';
-import { CmsImage } from '../lib/cms/image';
+import { ARTICLE_IMAGE_SIZES, CmsImage } from '../lib/cms/image';
 import { formatDate } from '../lib/cms/format';
 import { PortableBody } from '../lib/cms/PortableBody';
 import { ARTICLE_QUERY } from '../lib/cms/queries';
@@ -74,6 +74,7 @@ export function ArticlePage() {
                 alt={article.mainImage.alt ?? article.title}
                 width={768}
                 height={432}
+                sizes={ARTICLE_IMAGE_SIZES}
                 loading="eager"
                 className="w-full rounded-2xl object-cover"
               />

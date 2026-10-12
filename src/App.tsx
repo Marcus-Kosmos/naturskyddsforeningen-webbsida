@@ -1,10 +1,14 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, matchPath, useLocation, useNavigationType } from 'react-router-dom';
 import { Suspense, lazy, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ThemeProvider } from './components/ThemeProvider';
 import { SiteProvider } from './lib/cms/SiteProvider';
+import { ARTICLE_QUERY } from './lib/cms/queries';
+import type { ArticleFull } from './lib/cms/types';
+import { useSanityQuery } from './lib/cms/useSanityQuery';
 import { Navigation } from './components/Navigation';
 import { Breadcrumbs } from './components/Breadcrumbs';
+import { RouteErrorBoundary } from './components/RouteErrorBoundary';
 import { ScrollToTop } from './components/ScrollToTop';
 import { StickyMemberBanner } from './components/StickyMemberBanner';
 import { Footer } from './components/Footer';
@@ -36,18 +40,28 @@ const breadcrumbMap: Record<string, { label: string; parent?: string }> = {
 
 function AppContent() {
   const location = useLocation();
+  const navigationType = useNavigationType();
 
+  // Start new pages at the top, but leave Back/Forward alone so the browser can restore the scroll position.
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (navigationType !== 'POP') window.scrollTo(0, 0);
   }, [location.pathname]);
   const isHome = location.pathname === '/';
   const crumbInfo = breadcrumbMap[location.pathname];
-  const isArticle = location.pathname.startsWith('/nyheter/');
+
+  // Shares its request with ArticlePage (same query and params, so one fetch).
+  const articleSlug = matchPath('/nyheter/:slug', location.pathname)?.params.slug;
+  const { data: article, loading: articleLoading, error: articleError } = useSanityQuery<ArticleFull>(
+    articleSlug ? ARTICLE_QUERY : null,
+    { slug: articleSlug },
+  );
+  // No label for a slug that doesn't exist: that page is a 404 and gets no article crumb.
+  const articleLabel = article ? article.title : articleLoading || articleError ? 'Artikel' : null;
 
   const breadcrumbItems = isHome
     ? [{ label: 'Hem', href: '/' }]
-    : isArticle
-    ? [{ label: 'Hem', href: '/' }, { label: 'Nyheter', href: '/nyheter' }, { label: 'Artikel', href: location.pathname }]
+    : articleSlug && articleLabel
+    ? [{ label: 'Hem', href: '/' }, { label: 'Nyheter', href: '/nyheter' }, { label: articleLabel, href: location.pathname }]
     : crumbInfo
     ? [{ label: 'Hem', href: '/' }, { label: crumbInfo.label, href: location.pathname }]
     : [{ label: 'Hem', href: '/' }];
@@ -57,6 +71,7 @@ function AppContent() {
       <Navigation />
       <Breadcrumbs items={breadcrumbItems} />
       <main id="main-content" className="bg-gray-200 dark:bg-slate-900 reading:bg-gray-100">
+        <RouteErrorBoundary resetKey={location.pathname}>
         <Suspense
           fallback={
             <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-label="Laddar">
@@ -80,6 +95,7 @@ function AppContent() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </Suspense>
+        </RouteErrorBoundary>
       </main>
       <Footer />
       <ScrollToTop />

@@ -1,6 +1,6 @@
 import { PortableText, type PortableTextComponents, type PortableTextProps } from '@portabletext/react'
 import { Link } from 'react-router-dom'
-import { CmsImage } from './image'
+import { ARTICLE_IMAGE_SIZES, CmsImage } from './image'
 
 // Marks and blocks mirror studio/schemaTypes/article.ts (body field).
 
@@ -71,6 +71,7 @@ const components: PortableTextComponents = {
           image={value}
           alt={value?.alt ?? ''}
           width={768}
+          sizes={ARTICLE_IMAGE_SIZES}
           className="w-full rounded-xl"
         />
         {value?.caption && (
@@ -79,10 +80,13 @@ const components: PortableTextComponents = {
       </figure>
     ),
     callout: ({ value }) => (
-      <aside className="my-8 rounded-xl border border-[#5A7C50]/30 bg-[#5A7C50]/10 p-6 dark:bg-[#5A7C50]/20">
-        {value?.heading && <h3 className="mb-2 mt-0 text-gray-900 dark:text-white">{value.heading}</h3>}
+      // Not a heading: it would skip levels in articles that have no h2 before it.
+      <div role="note" className="my-8 rounded-xl border border-[#5A7C50]/30 bg-[#5A7C50]/10 p-6 dark:bg-[#5A7C50]/20">
+        {value?.heading && (
+          <p className="mb-2 mt-0 text-xl font-semibold text-gray-900 dark:text-white">{value.heading}</p>
+        )}
         {value?.text && <p className="mb-0 whitespace-pre-line text-gray-700 dark:text-gray-300">{value.text}</p>}
-      </aside>
+      </div>
     ),
   },
 }

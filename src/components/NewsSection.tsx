@@ -10,8 +10,8 @@ import { useSanityQuery } from '../lib/cms/useSanityQuery';
 
 export function NewsSection() {
   const { ref, isInView } = useInView();
-  const { data: news, loading: newsLoading } = useSanityQuery<ArticleCard[]>(LATEST_ARTICLES_QUERY);
-  const { data: events, loading: eventsLoading } = useSanityQuery<EventItem[]>(UPCOMING_EVENTS_QUERY);
+  const { data: news, loading: newsLoading, error: newsError } = useSanityQuery<ArticleCard[]>(LATEST_ARTICLES_QUERY);
+  const { data: events, loading: eventsLoading, error: eventsError } = useSanityQuery<EventItem[]>(UPCOMING_EVENTS_QUERY);
 
   return (
     <section ref={ref} className="py-16 bg-white dark:bg-slate-900 reading:bg-white reading:max-w-3xl reading:mx-auto">
@@ -59,7 +59,9 @@ export function NewsSection() {
                 </Link>
               ))}
               {!newsLoading && (news ?? []).length === 0 && (
-                <p className="text-gray-500 dark:text-gray-400">Inga nyheter just nu.</p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {newsError ? 'Det gick inte att hämta nyheterna just nu.' : 'Inga nyheter just nu.'}
+                </p>
               )}
             </div>
           </div>
@@ -90,7 +92,9 @@ export function NewsSection() {
                 </CmsLink>
               ))}
               {!eventsLoading && (events ?? []).length === 0 && (
-                <p className="text-gray-500 dark:text-gray-400">Inga kommande aktiviteter just nu.</p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {eventsError ? 'Det gick inte att hämta kalendern just nu.' : 'Inga kommande aktiviteter just nu.'}
+                </p>
               )}
             </div>
           </div>

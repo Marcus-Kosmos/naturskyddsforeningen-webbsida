@@ -80,7 +80,9 @@ export default defineType({
       name: 'publishedAt',
       title: 'Publiceringsdatum',
       type: 'datetime',
+      description: 'Nyheterna sorteras efter detta datum.',
       initialValue: () => new Date().toISOString(),
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'body',
@@ -114,8 +116,18 @@ export default defineType({
                     name: 'href',
                     type: 'url',
                     title: 'URL',
+                    // The site only renders links that start with "/" (a page on this site)
+                    // or with https:, http: or mailto:. Studio's own relative-URL check is
+                    // looser ("klimat" or "#fakta" pass), so those would silently lose their link.
                     validation: (Rule) =>
-                      Rule.uri({allowRelative: true, scheme: ['https', 'http', 'mailto']}),
+                      Rule.uri({allowRelative: true, scheme: ['https', 'http', 'mailto']}).custom(
+                        (href) => {
+                          if (!href) return true
+                          if (href.startsWith('/') && !href.startsWith('//')) return true
+                          if (/^(https?:|mailto:)/i.test(href)) return true
+                          return 'Skriv en hel webbadress som börjar med https://, eller en sidlänk som börjar med / (till exempel /klimat).'
+                        },
+                      ),
                   },
                   {
                     name: 'blank',

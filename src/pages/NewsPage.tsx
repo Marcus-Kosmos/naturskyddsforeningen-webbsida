@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Calendar, Tag, ArrowRight, Search, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { MembershipCTA } from '../components/MembershipCTA';
@@ -15,11 +14,25 @@ const fadeUp = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.06 } }),
 };
 
+// The card clips its children (overflow-hidden), so the keyboard focus ring is drawn inside the edge.
+// The "!" is needed: the global *:focus-visible rule isn't in a CSS layer, so it beats plain utilities.
+const CARD_LINK = 'block rounded-2xl focus-visible:outline-offset-[-3px]!';
+
 // Display order for the filter chips; only categories that have articles are shown.
 // Keep in sync with the category list in studio/schemaTypes/article.ts.
 const CATEGORY_ORDER = ['Klimat', 'Biologisk mångfald', 'Hav och vatten', 'Skog', 'Politik', 'Kampanj'];
 
-function ArticleImage({ article, width, height }: { article: ArticleCard; width: number; height: number }) {
+function ArticleImage({
+  article,
+  width,
+  height,
+  sizes,
+}: {
+  article: ArticleCard;
+  width: number;
+  height: number;
+  sizes: string;
+}) {
   if (!article.mainImage?.asset) {
     return <div className="w-full h-full bg-gradient-to-br from-[#5A7C50] to-[#4A6741]" aria-hidden="true" />;
   }
@@ -29,14 +42,16 @@ function ArticleImage({ article, width, height }: { article: ArticleCard; width:
       alt={article.mainImage.alt ?? article.title}
       width={width}
       height={height}
+      sizes={sizes}
       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
     />
   );
 }
 
 export function NewsPage() {
-  const [activeCategory, setActiveCategory] = useState('Alla');
-  const [searchQuery, setSearchQuery] = useState('');
+  // Filter and search live in the URL, so Back from an article returns to the same view.
+  const [params, setParams] = useSearchParams();
+  const searchQuery = params.get('q') ?? '';
   const { data, loading, error } = useSanityQuery<ArticleCard[]>(ARTICLES_QUERY);
   const articles = data ?? [];
 
@@ -51,6 +66,21 @@ export function NewsPage() {
     ...CATEGORY_ORDER.filter((c) => present.has(c)),
     ...[...present].filter((c) => !CATEGORY_ORDER.includes(c)),
   ];
+
+  // A category from the URL that has no articles (a stale link) falls back to showing everything.
+  const requestedCategory = params.get('kategori') ?? 'Alla';
+  const activeCategory = loading || categories.includes(requestedCategory) ? requestedCategory : 'Alla';
+
+  const updateParam = (name: 'kategori' | 'q', value: string) =>
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value && value !== 'Alla') next.set(name, value);
+        else next.delete(name);
+        return next;
+      },
+      { replace: true },
+    );
 
   const filtered = articles.filter((a) => {
     const matchCat = activeCategory === 'Alla' || a.category === activeCategory;
@@ -82,7 +112,7 @@ export function NewsPage() {
               type="text"
               placeholder="Sök nyheter..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => updateParam('q', e.target.value)}
               className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5A7C50]"
             />
           </div>
@@ -96,7 +126,7 @@ export function NewsPage() {
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => updateParam('kategori', cat)}
                 className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   activeCategory === cat
                     ? 'bg-[#5A7C50] text-white'
@@ -133,9 +163,9 @@ export function NewsPage() {
                       variants={fadeUp}
                       className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
                     >
-                      <Link to={`/nyheter/${article.slug}`} className="block">
+                      <Link to={`/nyheter/${article.slug}`} className={CARD_LINK}>
                       <div className="h-56 overflow-hidden">
-                        <ArticleImage article={article} width={800} height={448} />
+                        <ArticleImage article={article} width={800} height={448} sizes="(min-width: 1280px) 600px, (min-width: 768px) 50vw, 100vw" />
                       </div>
                       <div className="p-6">
                         <div className="flex items-center gap-3 mb-3">
@@ -172,9 +202,9 @@ export function NewsPage() {
                     variants={fadeUp}
                     className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
                   >
-                    <Link to={`/nyheter/${article.slug}`} className="block">
+                    <Link to={`/nyheter/${article.slug}`} className={CARD_LINK}>
                     <div className="h-40 overflow-hidden">
-                      <ArticleImage article={article} width={500} height={320} />
+                      <ArticleImage article={article} width={500} height={320} sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" />
                     </div>
                     <div className="p-5">
                       <div className="flex items-center gap-3 mb-2">
