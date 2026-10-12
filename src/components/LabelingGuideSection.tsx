@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Search, ChevronDown, ChevronUp, CheckCircle, AlertCircle, XCircle, ChevronLeft, ChevronRight, Grid3x3, Maximize2 } from 'lucide-react';
-import { useInView } from '../hooks/useInView';
+import { useSite } from '../lib/cms/SiteProvider';
+import type { LabelGuideBlock } from '../lib/cms/types';
+import { Eyebrow, Paragraphs, SectionShell } from './blocks/shared';
 const braMiljovalLogo = '/images/labels/bra-miljoval.png';
 const svanenLogo = '/images/labels/svanen.png';
 const euEcolabelLogo = '/images/labels/eu-ecolabel.png';
@@ -225,8 +227,9 @@ const labels: Label[] = [
   },
 ];
 
-export function LabelingGuideSection() {
-  const { ref, isInView } = useInView();
+/** The searchable guide to eco-labels. The copy around it comes from the CMS; the labels themselves are still defined above. */
+export function LabelingGuideSection({ block }: { block: LabelGuideBlock }) {
+  const { fill } = useSite();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<LabelCategory>('all');
   const [expandedLabel, setExpandedLabel] = useState<string | null>(null);
@@ -318,19 +321,15 @@ export function LabelingGuideSection() {
   };
 
   return (
-    <section ref={ref} className="py-16 bg-white dark:bg-slate-900 reading:bg-white reading:max-w-3xl reading:mx-auto">
-      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isInView ? 'animate-fadeInUp' : ''}`}>
+    <SectionShell anchor={block.anchor} background={block.background}>
         {/* Header */}
         <div className="text-center reading:text-left mb-12">
-          <span className="inline-block px-3 py-1 bg-[#8FA888]/20 dark:bg-[#5A7C50]/30 reading:bg-white reading:border reading:border-gray-900 text-[#4A6741] dark:text-[#B8D4B0] reading:text-gray-900 rounded-full mb-4">
-            Märkningsguide
-          </span>
-          <h2 className="mb-4 text-gray-900 dark:text-white reading:text-gray-900">
-            Navigera bland miljömärkningarna
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 reading:text-gray-700 max-w-3xl mx-auto reading:mx-0">
-            Det finns hundratals miljömärkningar. Vi har granskat dem och visar vilka du kan lita på.
-          </p>
+          <Eyebrow text={block.eyebrow} />
+          <h2 className="mb-4 text-gray-900 dark:text-white reading:text-gray-900">{fill(block.heading)}</h2>
+          <Paragraphs
+            text={block.body}
+            className="text-gray-600 dark:text-gray-400 reading:text-gray-700 max-w-3xl mx-auto reading:mx-0"
+          />
         </div>
 
         {/* Search */}
@@ -553,26 +552,26 @@ export function LabelingGuideSection() {
         )}
 
         {/* Info Box */}
-        <div className="mt-12 p-6 bg-[#8FA888]/10 dark:bg-[#5A7C50]/20 reading:bg-gray-50 rounded-xl reading:rounded-none border border-[#5A7C50]/30 dark:border-[#5A7C50]/40 reading:border-gray-300">
-          <h3 className="text-gray-900 dark:text-white reading:text-gray-900 mb-3">
-            Hur använder jag guiden?
-          </h3>
-          <ul className="space-y-2 text-gray-700 dark:text-gray-300 reading:text-gray-900">
-            <li className="flex items-start gap-2">
-              <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0 text-[#4A6741] dark:text-[#B8D4B0]" />
-              <span><strong>Rekommenderade:</strong> Märkningar som uppfyller höga miljökrav</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0 text-[#4A6741] dark:text-[#B8D4B0]" />
-              <span><strong>Med begränsningar:</strong> Märkningar som är bättre än inget men har vissa brister</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <XCircle className="w-5 h-5 mt-0.5 flex-shrink-0 text-[#4A6741] dark:text-[#B8D4B0]" />
-              <span><strong>Inte tillräckliga:</strong> Märkningar som inte lever upp till miljökrav</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </section>
+        {block.infoItems && block.infoItems.length > 0 && (
+          <div className="mt-12 p-6 bg-[#8FA888]/10 dark:bg-[#5A7C50]/20 reading:bg-gray-50 rounded-xl reading:rounded-none border border-[#5A7C50]/30 dark:border-[#5A7C50]/40 reading:border-gray-300">
+            {block.infoHeading && (
+              <h3 className="text-gray-900 dark:text-white reading:text-gray-900 mb-3">{fill(block.infoHeading)}</h3>
+            )}
+            <ul className="space-y-2 text-gray-700 dark:text-gray-300 reading:text-gray-900">
+              {block.infoItems.map((item, index) => {
+                const StatusIcon = getStatusConfig(item.status)?.icon ?? CheckCircle;
+                return (
+                  <li key={item._key ?? index} className="flex items-start gap-2">
+                    <StatusIcon className="w-5 h-5 mt-0.5 flex-shrink-0 text-[#4A6741] dark:text-[#B8D4B0]" />
+                    <span>
+                      <strong>{fill(item.label)}:</strong> {fill(item.text)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+    </SectionShell>
   );
 }

@@ -7,6 +7,8 @@ export default defineType({
   // Singleton (id "homePage"); see structure.ts and sanity.config.ts.
   groups: [
     {name: 'hero', title: 'Hjältesektionen'},
+    {name: 'sections', title: 'Avsnitt'},
+    {name: 'seo', title: 'Sökmotorer'},
   ],
   fields: [
     defineField({
@@ -40,6 +42,20 @@ export default defineType({
       type: 'string',
       group: 'hero',
       initialValue: 'Läs mer om föreningen',
+    }),
+    defineField({
+      name: 'heroPrimaryLink',
+      title: 'Primär knapp – länk',
+      type: 'link',
+      group: 'hero',
+      description: 'Utan länk visas ingen primär knapp.',
+    }),
+    defineField({
+      name: 'heroSecondaryLink',
+      title: 'Sekundär knapp – länk',
+      type: 'link',
+      group: 'hero',
+      description: 'Utan länk visas ingen sekundär knapp.',
     }),
     defineField({
       name: 'heroImages',
@@ -89,6 +105,45 @@ export default defineType({
         },
       ],
       validation: (Rule) => Rule.min(1).max(6).error('Lägg till minst 1 och max 6 bilder.'),
+    }),
+    defineField({
+      name: 'sections',
+      title: 'Avsnitt på startsidan',
+      type: 'array',
+      group: 'sections',
+      description:
+        'Avsnitten visas i den här ordningen, under hjältesektionen och ovanför medlemsrutan. Dra i handtaget för att ändra ordning.',
+      of: [
+        {type: 'featureSection'},
+        {type: 'cardGridSection'},
+        {type: 'statsSection'},
+        {type: 'labelGuideSection'},
+        {type: 'newsEventsSection'},
+      ],
+    }),
+    defineField({
+      name: 'seo',
+      title: 'Sökmotorer och delning',
+      type: 'object',
+      group: 'seo',
+      options: {collapsible: false},
+      fields: [
+        defineField({
+          name: 'metaTitle',
+          title: 'Sidtitel',
+          type: 'string',
+          description: 'Visas i webbläsarfliken. "– Naturskyddsföreningen" läggs till automatiskt. Utan titel används standardtiteln.',
+          validation: (rule) => rule.max(60),
+        }),
+        defineField({
+          name: 'metaDescription',
+          title: 'Beskrivning',
+          type: 'text',
+          rows: 3,
+          description: 'Kort beskrivning som sökmotorer kan visa, helst under 160 tecken.',
+          validation: (rule) => rule.max(160),
+        }),
+      ],
     }),
   ],
   preview: {

@@ -11,7 +11,7 @@ export interface ResolvedLink {
 const SAFE_EXTERNAL = /^(https?:|mailto:|tel:)/i
 
 export function resolveLink(link?: CmsLinkData): ResolvedLink | null {
-  if (!link) return null
+  if (!link || link.linkType === 'action') return null
   if (link.linkType === 'external') {
     return link.url && SAFE_EXTERNAL.test(link.url.trim())
       ? { href: link.url.trim(), external: true, newTab: !!link.newTab }
@@ -20,4 +20,10 @@ export function resolveLink(link?: CmsLinkData): ResolvedLink | null {
   return link.path && link.path.startsWith('/') && !link.path.startsWith('//')
     ? { href: link.path, external: false, newTab: false }
     : null
+}
+
+/** True if the link leads somewhere: a page, an address or a known site action. Used to leave out dead buttons. */
+export function isUsableLink(link?: CmsLinkData): boolean {
+  if (link?.linkType === 'action') return link.action === 'openAssociations'
+  return resolveLink(link) !== null
 }
