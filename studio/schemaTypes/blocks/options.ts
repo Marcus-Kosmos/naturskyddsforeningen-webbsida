@@ -45,11 +45,18 @@ export const sectionBasics = (defaultBackground = 'white') => [
     description:
       'Gör det möjligt att länka direkt till avsnittet, till exempel "klimat" ger adressen /#klimat. Små bokstäver, siffror och bindestreck.',
     validation: (rule) =>
-      rule.custom((value) =>
-        !value || /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value)
-          ? true
-          : 'Använd bara små bokstäver (a–z), siffror och bindestreck, till exempel "bra-miljoval".',
-      ),
+      rule.custom((value, context) => {
+        if (!value) return true
+        if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(value)) {
+          return 'Använd bara små bokstäver (a–z), siffror och bindestreck, till exempel "bra-miljoval".'
+        }
+        // Two sections with the same anchor make /#anchor and the share links ambiguous, which
+        // is easy to do with "Duplicate".
+        const sections = ((context.document as {sections?: Array<{_key?: string; anchor?: string}>})?.sections ?? [])
+        const ownKey = (context.path[1] as {_key?: string} | undefined)?._key
+        const clash = sections.some((section) => section._key !== ownKey && section.anchor === value)
+        return clash ? 'Ankaret används redan av ett annat avsnitt. Välj ett unikt.' : true
+      }),
   }),
   defineField({
     name: 'background',

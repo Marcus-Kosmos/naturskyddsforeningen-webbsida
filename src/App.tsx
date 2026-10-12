@@ -54,8 +54,10 @@ function AppContent() {
 
   // Start new pages at the top, but leave Back/Forward alone so the browser can restore the scroll position.
   useEffect(() => {
-    // A link with a #section hash is scrolled into place by the page itself.
-    if (navigationType !== 'POP' && !location.hash) window.scrollTo(0, 0);
+    if (navigationType === 'POP') return;
+    // A link to a #section is scrolled into place by the page itself, as long as that section exists.
+    if (location.hash && document.getElementById(decodeSegment(location.hash.slice(1)))) return;
+    window.scrollTo(0, 0);
   }, [location.pathname]);
   const isHome = location.pathname === '/';
   const crumbInfo = breadcrumbMap[location.pathname];

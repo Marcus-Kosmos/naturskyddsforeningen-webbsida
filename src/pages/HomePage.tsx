@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigationType } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { Hero } from '../components/Hero';
 import { MembershipCTA } from '../components/MembershipCTA';
@@ -11,13 +11,17 @@ import { usePageMeta } from '../lib/cms/usePageMeta';
 
 export function HomePage() {
   const { data, loading, error } = useSanityQuery<HomeData>(HOME_QUERY);
-  const { hash } = useLocation();
+  const { hash, key } = useLocation();
+  const navigationType = useNavigationType();
 
   usePageMeta({ title: data?.seo?.metaTitle, description: data?.seo?.metaDescription });
 
-  // A link like /#bra-miljoval jumps to that section once the sections exist.
+  // A link like /#bra-miljoval jumps to that section once the sections exist. `key` changes on every
+  // navigation, so clicking the same link again scrolls again. Back/Forward are left to the browser,
+  // which restores where the visitor was; a freshly loaded or shared URL has the key "default".
   useEffect(() => {
     if (!data || !hash) return;
+    if (navigationType === 'POP' && key !== 'default') return;
     let id = hash.slice(1);
     try {
       id = decodeURIComponent(id);
@@ -25,11 +29,12 @@ export function HomePage() {
       // keep the raw value
     }
     document.getElementById(id)?.scrollIntoView();
-  }, [data, hash]);
+  }, [data, hash, key, navigationType]);
 
   if (loading) {
+    // Tall enough to keep the footer below the fold, so it doesn't jump when the page arrives.
     return (
-      <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-label="Hämtar startsidan">
+      <div className="flex min-h-screen items-center justify-center" role="status" aria-label="Hämtar startsidan">
         <Loader2 className="w-8 h-8 animate-spin text-[#5A7C50]" />
       </div>
     );

@@ -59,10 +59,12 @@ interface EyebrowProps {
   text?: string;
   icon?: string;
   image?: CmsImageData;
+  /** Centre the row, for headers that are centred. */
+  center?: boolean;
 }
 
 /** The small label above a heading: a pill, optionally with an icon circle and/or a logo beside it. */
-export function Eyebrow({ text, icon, image }: EyebrowProps) {
+export function Eyebrow({ text, icon, image, center }: EyebrowProps) {
   const { fill } = useSite();
   const Icon = getIcon(icon);
   const hasImage = !!image?.asset;
@@ -72,7 +74,7 @@ export function Eyebrow({ text, icon, image }: EyebrowProps) {
   }
 
   return (
-    <div className="flex items-center gap-3 mb-4">
+    <div className={`flex items-center gap-3 mb-4 ${center ? 'justify-center reading:justify-start' : ''}`}>
       {Icon && (
         <div className="w-12 h-12 bg-[#5A7C50] dark:bg-[#6B8E65] reading:bg-gray-900 rounded-full flex items-center justify-center reading:hidden">
           <Icon className="w-6 h-6 text-white" />

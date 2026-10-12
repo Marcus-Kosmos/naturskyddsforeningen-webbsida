@@ -108,7 +108,7 @@ export default defineType({
       type: 'array',
       group: 'items',
       of: [{type: 'stat'}],
-      description: 'Visas som tre rutor under bilden.',
+      description: 'Visas som rutor under bilden, upp till fyra.',
       validation: (rule) => rule.max(4),
       hidden: (context) => !isStacked(context),
     }),
@@ -117,7 +117,8 @@ export default defineType({
       title: 'Visa kommande aktiviteter',
       type: 'boolean',
       group: 'items',
-      description: 'Visar de närmaste aktiviteterna från Evenemang.',
+      description:
+        'Visar de närmaste kommande aktiviteterna som är markerade som "Lokalt evenemang" under Evenemang.',
       initialValue: false,
     }),
     defineField({

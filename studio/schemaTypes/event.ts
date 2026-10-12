@@ -46,7 +46,7 @@ export default defineType({
     defineField({
       name: 'local',
       title: 'Lokalt evenemang',
-      description: 'Arrangeras av en lokalförening.',
+      description: 'Arrangeras av en lokalförening. Endast lokala evenemang visas i avsnitten "Nära dig" på startsidan.',
       type: 'boolean',
       initialValue: false,
     }),

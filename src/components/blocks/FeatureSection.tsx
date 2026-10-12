@@ -25,6 +25,15 @@ const SPLIT_ORDER = {
   'left-media': { content: 'order-2', media: 'order-1' },
 };
 
+// Columns for the key figures under a wide picture; written out in full for Tailwind.
+const STATS_COLUMNS: Record<number, string> = {
+  0: 'md:grid-cols-3',
+  1: 'md:grid-cols-3',
+  2: 'md:grid-cols-2',
+  3: 'md:grid-cols-3',
+  4: 'md:grid-cols-2 lg:grid-cols-4',
+};
+
 function ItemIcon({ icon }: { icon?: string }) {
   const Icon = getIcon(icon);
   if (!Icon) return null;
@@ -164,12 +173,12 @@ export function FeatureSection({ block }: { block: FeatureBlock }) {
 
   if (block.layout === 'stacked') {
     const stats = block.stats ?? [];
-    const hasPanel = items.length > 0 || (block.links ?? []).length > 0 || block.showShare;
+    const hasPanel = items.length > 0 || block.showEvents || (block.links ?? []).length > 0 || block.showShare;
 
     return (
       <SectionShell anchor={block.anchor} background={block.background}>
         <div className="text-center mb-12 reading:text-left">
-          <Eyebrow text={block.eyebrow} icon={block.eyebrowIcon} image={block.eyebrowImage} />
+          <Eyebrow text={block.eyebrow} icon={block.eyebrowIcon} image={block.eyebrowImage} center />
           <h2 className="mb-4 text-gray-900 dark:text-white reading:text-gray-900">{fill(block.heading)}</h2>
           <Paragraphs
             text={block.body}
@@ -184,7 +193,7 @@ export function FeatureSection({ block }: { block: FeatureBlock }) {
         )}
 
         {stats.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className={`grid grid-cols-1 gap-6 mb-8 ${STATS_COLUMNS[Math.min(stats.length, 4)]}`}>
             {stats.map((stat, index) => (
               <div
                 key={stat._key ?? index}
@@ -212,6 +221,7 @@ export function FeatureSection({ block }: { block: FeatureBlock }) {
                 ))}
               </div>
             )}
+            {block.showEvents && <UpcomingEvents heading={block.eventsHeading} />}
             <BlockLinks links={block.links} />
             {block.showShare && <Share block={block} />}
           </div>
@@ -225,8 +235,12 @@ export function FeatureSection({ block }: { block: FeatureBlock }) {
 
   return (
     <SectionShell anchor={block.anchor} background={block.background}>
-      <div className="grid grid-cols-1 lg:grid-cols-2 reading:grid-cols-1 gap-12 items-center">
-        <div className={order.content}>
+      <div
+        className={
+          images.length > 0 ? 'grid grid-cols-1 lg:grid-cols-2 reading:grid-cols-1 gap-12 items-center' : 'max-w-3xl'
+        }
+      >
+        <div className={images.length > 0 ? order.content : ''}>
           <Eyebrow text={block.eyebrow} icon={block.eyebrowIcon} image={block.eyebrowImage} />
           <h2 className="mb-4 text-gray-900 dark:text-white reading:text-gray-900">{fill(block.heading)}</h2>
           <Paragraphs text={block.body} className="text-gray-600 dark:text-gray-400 reading:text-gray-700 mb-6" />

@@ -19,7 +19,9 @@ export function CmsLink({ link, className, onClick, children }: CmsLinkProps) {
     return (
       <button
         type="button"
-        className={className}
+        // A button doesn't inherit what a link gets for free: the pointer, left-aligned text and, when
+        // the caller lays it out as a block (menus, cards), the full width.
+        className={`cursor-pointer text-left ${/(^|\s)block(\s|$)/.test(className ?? '') ? 'w-full' : ''} ${className ?? ''}`}
         onClick={() => {
           associations.open()
           onClick?.()

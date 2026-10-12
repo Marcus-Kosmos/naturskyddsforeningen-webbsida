@@ -34,7 +34,7 @@ export default defineType({
   preview: {
     select: {title: 'newsHeading', subtitle: 'eventsHeading', background: 'background'},
     prepare: ({title, subtitle, background}) => ({
-      title: `${title} + ${subtitle}`,
+      title: [title, subtitle].filter(Boolean).join(' + ') || 'Nyheter och kalender',
       subtitle: `Nyheter och kalender · ${BACKGROUND_TITLES[background] ?? ''}`,
     }),
   },
