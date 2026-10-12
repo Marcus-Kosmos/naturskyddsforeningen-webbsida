@@ -1,133 +1,92 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Calendar, Tag, ArrowRight, Search, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { client, urlFor } from '../lib/sanityClient';
 import { MembershipCTA } from '../components/MembershipCTA';
+import { CmsImage } from '../lib/cms/image';
+import { formatDate } from '../lib/cms/format';
+import { ARTICLES_QUERY } from '../lib/cms/queries';
+import type { ArticleCard } from '../lib/cms/types';
+import { useSanityQuery } from '../lib/cms/useSanityQuery';
+import { usePageMeta } from '../lib/cms/usePageMeta';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.06 } }),
 };
 
-const categories = ['Alla', 'Klimat', 'Biologisk mångfald', 'Hav och vatten', 'Skog', 'Politik', 'Kampanj'];
+// The link fills the card, so its focus ring follows the card's corners. The card itself must not
+// clip (no overflow-hidden), or the ring would be cut off; only the image area clips its hover zoom.
+const CARD_LINK = 'block rounded-2xl';
 
-// Fallback articles shown before any CMS content is published
-const fallbackArticles = [
-  {
-    _id: '1',
-    title: 'Ny rapport: Fjällräven hotas av varmare vintrar',
-    excerpt: 'En ny studie visar att fjällrävens reproduktion minskar kraftigt i takt med att snötäcket krymper. Naturskyddsföreningen kräver åtgärder.',
-    publishedAt: '2026-03-24T00:00:00Z',
-    category: 'Biologisk mångfald',
-    mainImage: null,
-    fallbackImg: 'https://images.unsplash.com/photo-1641119580222-3e90f9a11287?w=800&q=80',
-    featured: true,
-  },
-  {
-    _id: '2',
-    title: 'Sverige missar klimatmålen – vi kräver krafttag',
-    excerpt: 'Naturvårdsverkets senaste rapport visar att utsläppen inte minskar i den takt som krävs. Föreningen uppmanar regeringen att agera nu.',
-    publishedAt: '2026-03-20T00:00:00Z',
-    category: 'Klimat',
-    mainImage: null,
-    fallbackImg: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=800&q=80',
-    featured: true,
-  },
-  {
-    _id: '3',
-    title: 'Seger i rätten: Skyddsvärd skog räddad i Dalarna',
-    excerpt: 'Efter ett långt juridiskt arbete har Mark- och miljödomstolen stoppat avverkning av 40 hektar gammalskog i Dalarna.',
-    publishedAt: '2026-03-15T00:00:00Z',
-    category: 'Skog',
-    mainImage: null,
-    fallbackImg: 'https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=800&q=80',
-    featured: false,
-  },
-  {
-    _id: '4',
-    title: 'Östersjön: Nya data visar förbättrad syresituation',
-    excerpt: 'Trots utmaningarna visar årets mätningar att syresättningen i delar av Östersjön har förbättrats. Men läget är fortfarande allvarligt.',
-    publishedAt: '2026-03-12T00:00:00Z',
-    category: 'Hav och vatten',
-    mainImage: null,
-    fallbackImg: 'https://images.unsplash.com/photo-1440020143730-090579c4d53c?w=800&q=80',
-    featured: false,
-  },
-  {
-    _id: '5',
-    title: 'Kampanj: Minska plast i naturen',
-    excerpt: 'Vår nya kampanj samlar frivilliga runt om i Sverige för att städa naturområden och påverka politiker att skärpa plastlagstiftningen.',
-    publishedAt: '2026-03-08T00:00:00Z',
-    category: 'Kampanj',
-    mainImage: null,
-    fallbackImg: 'https://images.unsplash.com/photo-1686333330383-be7ba34e9fb8?w=800&q=80',
-    featured: false,
-  },
-  {
-    _id: '6',
-    title: 'Riksdagen röstar om naturvårdsbudgeten',
-    excerpt: 'I veckan behandlar riksdagen ett motionspaket om naturvård. Vi uppmanar ledamöterna att prioritera natur framför kortsiktiga ekonomiska intressen.',
-    publishedAt: '2026-03-05T00:00:00Z',
-    category: 'Politik',
-    mainImage: null,
-    fallbackImg: 'https://images.unsplash.com/photo-1669399201888-ceaa45b683ee?w=800&q=80',
-    featured: false,
-  },
-];
+// Display order for the filter chips; only categories that have articles are shown.
+// Keep in sync with the category list in studio/schemaTypes/article.ts.
+const CATEGORY_ORDER = ['Klimat', 'Biologisk mångfald', 'Hav och vatten', 'Skog', 'Politik', 'Kampanj'];
 
-interface SanityArticle {
-  _id: string;
-  title: string;
-  excerpt?: string;
-  publishedAt: string;
-  category: string;
-  mainImage?: { asset: { _ref: string }; alt?: string };
-  fallbackImg?: string;
-  featured: boolean;
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('sv-SE', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  });
-}
-
-function ArticleImage({ article }: { article: SanityArticle }) {
-  const src = article.mainImage
-    ? urlFor(article.mainImage).width(800).height(400).url()
-    : article.fallbackImg ?? 'https://images.unsplash.com/photo-1641119580222-3e90f9a11287?w=800&q=80';
+function ArticleImage({
+  article,
+  width,
+  height,
+  sizes,
+}: {
+  article: ArticleCard;
+  width: number;
+  height: number;
+  sizes: string;
+}) {
+  if (!article.mainImage?.asset) {
+    return <div className="w-full h-full bg-gradient-to-br from-[#5A7C50] to-[#4A6741]" aria-hidden="true" />;
+  }
   return (
-    <img
-      src={src}
-      alt={article.mainImage?.alt ?? article.title}
+    <CmsImage
+      image={article.mainImage}
+      alt={article.mainImage.alt ?? article.title}
+      width={width}
+      height={height}
+      sizes={sizes}
       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
     />
   );
 }
 
-const ARTICLES_QUERY = `*[_type == "article"] | order(publishedAt desc) {
-  _id, title, excerpt, publishedAt, category, featured,
-  mainImage { asset, alt }
-}`
-
 export function NewsPage() {
-  const [activeCategory, setActiveCategory] = useState('Alla');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [articles, setArticles] = useState<SanityArticle[]>(fallbackArticles as SanityArticle[]);
-  const [loading, setLoading] = useState(true);
+  // Filter and search live in the URL, so Back from an article returns to the same view.
+  const [params, setParams] = useSearchParams();
+  // The search box keeps its own state: an input controlled by the URL loses its caret position while typing.
+  const [searchQuery, setSearchQuery] = useState(() => params.get('q') ?? '');
+  const { data, loading, error } = useSanityQuery<ArticleCard[]>(ARTICLES_QUERY);
+  const articles = data ?? [];
 
+  usePageMeta({
+    title: 'Nyheter',
+    description: 'Håll dig uppdaterad om klimat, natur och miljöpolitik. Nyheter, rapporter och kampanjer från Naturskyddsföreningen.',
+  });
+
+  const present = new Set(articles.map((a) => a.category));
+  const categories = [
+    'Alla',
+    ...CATEGORY_ORDER.filter((c) => present.has(c)),
+    ...[...present].filter((c) => !CATEGORY_ORDER.includes(c)),
+  ];
+
+  // A category from the URL that has no articles (a stale link) falls back to showing everything.
+  const requestedCategory = params.get('kategori') ?? 'Alla';
+  const activeCategory = loading || categories.includes(requestedCategory) ? requestedCategory : 'Alla';
+
+  const updateParam = (name: 'kategori' | 'q', value: string) => {
+    // Start from the live URL; the router's copy of it can lag a render behind.
+    const next = new URLSearchParams(window.location.search);
+    if (value && !(name === 'kategori' && value === 'Alla')) next.set(name, value);
+    else next.delete(name);
+    setParams(next, { replace: true });
+  };
+
+  // The URL follows the search box a moment after typing stops.
   useEffect(() => {
-    client.fetch<SanityArticle[]>(ARTICLES_QUERY)
-      .then((data) => {
-        if (data && data.length > 0) {
-          setArticles(data);
-        }
-      })
-      .catch(() => {
-        // Silently fall back to hardcoded articles
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    if ((new URLSearchParams(window.location.search).get('q') ?? '') === searchQuery) return;
+    const timer = setTimeout(() => updateParam('q', searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const filtered = articles.filter((a) => {
     const matchCat = activeCategory === 'Alla' || a.category === activeCategory;
@@ -173,7 +132,7 @@ export function NewsPage() {
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => updateParam('kategori', cat)}
                 className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   activeCategory === cat
                     ? 'bg-[#5A7C50] text-white'
@@ -190,7 +149,13 @@ export function NewsPage() {
       <section className="py-12 bg-gray-50 dark:bg-slate-800 min-h-[60vh]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {filtered.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 py-16 text-center">Inga nyheter hittades.</p>
+            <p className="text-gray-500 dark:text-gray-400 py-16 text-center">
+              {loading
+                ? 'Hämtar nyheter…'
+                : error
+                ? 'Det gick inte att hämta nyheterna just nu. Försök igen om en stund.'
+                : 'Inga nyheter hittades.'}
+            </p>
           ) : (
             <>
               {featured.length > 0 && (
@@ -202,10 +167,11 @@ export function NewsPage() {
                       initial="hidden"
                       animate="visible"
                       variants={fadeUp}
-                      className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
+                      className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
                     >
-                      <div className="h-56 overflow-hidden">
-                        <ArticleImage article={article} />
+                      <Link to={`/nyheter/${article.slug}`} className={CARD_LINK}>
+                      <div className="h-56 overflow-hidden rounded-t-2xl">
+                        <ArticleImage article={article} width={800} height={448} sizes="(min-width: 1280px) 600px, (min-width: 768px) 50vw, 100vw" />
                       </div>
                       <div className="p-6">
                         <div className="flex items-center gap-3 mb-3">
@@ -226,6 +192,7 @@ export function NewsPage() {
                           Läs mer <ArrowRight className="w-4 h-4" />
                         </span>
                       </div>
+                      </Link>
                     </motion.article>
                   ))}
                 </div>
@@ -239,10 +206,11 @@ export function NewsPage() {
                     initial="hidden"
                     animate="visible"
                     variants={fadeUp}
-                    className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
+                    className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm hover:shadow-lg transition-shadow group cursor-pointer"
                   >
-                    <div className="h-40 overflow-hidden">
-                      <ArticleImage article={article} />
+                    <Link to={`/nyheter/${article.slug}`} className={CARD_LINK}>
+                    <div className="h-40 overflow-hidden rounded-t-2xl">
+                      <ArticleImage article={article} width={500} height={320} sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" />
                     </div>
                     <div className="p-5">
                       <div className="flex items-center gap-3 mb-2">
@@ -260,6 +228,7 @@ export function NewsPage() {
                         {article.excerpt}
                       </p>
                     </div>
+                    </Link>
                   </motion.article>
                 ))}
               </div>

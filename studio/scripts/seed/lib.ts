@@ -56,3 +56,51 @@ export const keyFrom = (value: string, index = 0) =>
     .normalize('NFKD')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')}-${index}`
+
+/**
+ * Create a published document only if it doesn't exist yet. The factory runs
+ * lazily, so expensive work (image uploads) is skipped on re-runs.
+ */
+export async function createOnce(
+  ctx: SeedContext,
+  id: string,
+  build: () => Promise<SanityDoc> | SanityDoc,
+): Promise<'created' | 'unchanged'> {
+  if (id.includes('.')) throw new Error(`Id "${id}" contains a dot and would be private`)
+  if (await ctx.client.getDocument(id)) return 'unchanged'
+  if (ctx.dryRun) return 'created'
+  const doc = await build()
+  if (doc._id !== id) throw new Error(`Factory returned _id "${doc._id}", expected "${id}"`)
+  await ctx.client.create(doc)
+  return 'created'
+}
+
+/**
+ * Fetch an image and upload it as a Sanity asset. Sanity de-duplicates by
+ * content hash, so uploading the same photo twice returns the same asset.
+ * Returns an image field value ready to embed in a document.
+ */
+export async function uploadImage(
+  ctx: SeedContext,
+  url: string,
+  fields: {alt?: string; caption?: string} = {},
+) {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`Could not fetch ${url}: ${response.status}`)
+  const buffer = Buffer.from(await response.arrayBuffer())
+  const filename = new URL(url).pathname.split('/').pop() ?? 'image'
+  const asset = await ctx.client.assets.upload('image', buffer, {
+    filename: `${filename}.jpg`,
+    contentType: response.headers.get('content-type') ?? 'image/jpeg',
+  })
+  return {_type: 'image', asset: {_type: 'reference', _ref: asset._id}, ...fields}
+}
+
+/** Full-size Unsplash photo URL for an id like "photo-1641119580222-3e90f9a11287". */
+export const unsplash = (id: string) => `https://images.unsplash.com/${id}?w=2000&q=85&fm=jpg&fit=max`
+
+/** Deterministic keys for Portable Text children. */
+export function keyMaker(prefix: string) {
+  let n = 0
+  return () => `${prefix}-${++n}`
+}

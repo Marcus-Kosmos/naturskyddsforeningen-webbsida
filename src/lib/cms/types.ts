@@ -1,3 +1,5 @@
+import type { PortableTextProps } from '@portabletext/react'
+
 // Hand-written types mirroring the Sanity schema (studio/schemaTypes).
 // `vite build` does not type-check, so keep these in sync by hand.
 
@@ -94,4 +96,39 @@ export interface SiteSettings {
     primaryCta: Cta
     secondaryCta: Cta
   }
+}
+
+export interface CmsImageData {
+  asset?: { _ref: string }
+  alt?: string
+  caption?: string
+  hotspot?: { x: number; y: number; width: number; height: number }
+  crop?: { top: number; bottom: number; left: number; right: number }
+}
+
+export interface ArticleCard {
+  _id: string
+  title: string
+  slug: string
+  excerpt?: string
+  publishedAt: string
+  category: string
+  featured?: boolean
+  mainImage?: CmsImageData
+}
+
+export interface ArticleFull extends ArticleCard {
+  body?: PortableTextProps['value']
+  seo?: { metaTitle?: string; metaDescription?: string }
+  author?: { name: string; role?: string; photo?: CmsImageData }
+}
+
+export interface EventItem {
+  _id: string
+  title: string
+  startDate: string
+  endDate?: string
+  location?: string
+  type?: string
+  link?: CmsLinkData
 }

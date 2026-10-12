@@ -3,6 +3,7 @@ import author from './author'
 import siteSettings from './siteSettings'
 import homePage from './homePage'
 import navigation from './navigation'
+import event from './event'
 import link from './objects/link'
 import cta from './objects/cta'
 import stat from './objects/stat'
@@ -15,6 +16,7 @@ export const schemaTypes = [
   homePage,
   siteSettings,
   navigation,
+  event,
   // Shared objects
   link,
   cta,

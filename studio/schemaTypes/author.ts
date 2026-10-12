@@ -34,6 +34,7 @@ export default defineType({
       name: 'email',
       title: 'E-post',
       type: 'string',
+      description: 'Obs: webbplatsens data är offentlig. Skriv bara in en adress som får vara synlig för alla; den visas inte på webbplatsen men kan läsas via API:et.',
     }),
   ],
   preview: {
