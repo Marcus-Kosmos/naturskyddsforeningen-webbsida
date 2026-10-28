@@ -2,6 +2,7 @@ import { Routes, Route, matchPath, useLocation, useNavigationType } from 'react-
 import { Suspense, lazy, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { ThemeProvider } from './components/ThemeProvider';
+import { AssociationsProvider } from './lib/cms/AssociationsProvider';
 import { SiteProvider } from './lib/cms/SiteProvider';
 import { ARTICLE_QUERY } from './lib/cms/queries';
 import type { ArticleFull } from './lib/cms/types';
@@ -53,7 +54,10 @@ function AppContent() {
 
   // Start new pages at the top, but leave Back/Forward alone so the browser can restore the scroll position.
   useEffect(() => {
-    if (navigationType !== 'POP') window.scrollTo(0, 0);
+    if (navigationType === 'POP') return;
+    // A link to a #section is scrolled into place by the page itself, as long as that section exists.
+    if (location.hash && document.getElementById(decodeSegment(location.hash.slice(1)))) return;
+    window.scrollTo(0, 0);
   }, [location.pathname]);
   const isHome = location.pathname === '/';
   const crumbInfo = breadcrumbMap[location.pathname];
@@ -118,7 +122,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <SiteProvider>
-        <AppContent />
+        <AssociationsProvider>
+          <AppContent />
+        </AssociationsProvider>
       </SiteProvider>
     </ThemeProvider>
   );

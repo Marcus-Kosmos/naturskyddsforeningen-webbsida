@@ -10,7 +10,7 @@ const ARTICLE_CARD = `_id, title, "slug": slug.current, excerpt, "publishedAt": 
 
 export const ARTICLES_QUERY = `*[_type == "article" && defined(slug.current)] | order(${PUBLISHED} desc) { ${ARTICLE_CARD} }`
 
-export const LATEST_ARTICLES_QUERY = `*[_type == "article" && defined(slug.current)] | order(${PUBLISHED} desc)[0...3] { ${ARTICLE_CARD} }`
+export const LATEST_ARTICLES_QUERY = `*[_type == "article" && defined(slug.current)] | order(${PUBLISHED} desc)[0...$count] { ${ARTICLE_CARD} }`
 
 // The author's e-mail is deliberately not projected.
 export const ARTICLE_QUERY = `*[_type == "article" && slug.current == $slug][0]{
@@ -18,6 +18,28 @@ export const ARTICLE_QUERY = `*[_type == "article" && slug.current == $slug][0]{
   "author": author->{ name, role, photo ${IMG} }
 }`
 
-export const UPCOMING_EVENTS_QUERY = `*[_type == "event" && coalesce(endDate, startDate) >= now()] | order(startDate asc)[0...3]{
-  _id, title, startDate, endDate, location, type, link
+const EVENT_FIELDS = `_id, title, startDate, endDate, location, type, link`
+
+export const UPCOMING_EVENTS_QUERY = `*[_type == "event" && coalesce(endDate, startDate) >= now()] | order(startDate asc)[0...$count]{
+  ${EVENT_FIELDS}
+}`
+
+// Only activities arranged by local associations (the "Nära dig" section).
+export const UPCOMING_LOCAL_EVENTS_QUERY = `*[_type == "event" && local == true && coalesce(endDate, startDate) >= now()] | order(startDate asc)[0...$count]{
+  ${EVENT_FIELDS}
+}`
+
+// The homepage: hero fields plus the ordered sections. `...` keeps every field of a
+// section; the image fields are then re-projected so they carry hotspot and crop.
+export const HOME_QUERY = `*[_type == "homePage" && _id == "homePage"][0]{
+  heroHeading, heroSubheading, heroPrimaryBtn, heroSecondaryBtn,
+  heroPrimaryLink, heroSecondaryLink,
+  seo,
+  heroImages[] ${IMG},
+  sections[]{
+    ...,
+    eyebrowImage ${IMG},
+    images[] ${IMG},
+    cards[]{ ..., logoLight ${IMG}, logoDark ${IMG} }
+  }
 }`

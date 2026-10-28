@@ -5,9 +5,10 @@ import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 export const client = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID || 'nmtsuoja',
   dataset: import.meta.env.VITE_SANITY_DATASET || 'production',
-  // Keep the CDN on everywhere: the non-CDN API enforces the project's CORS origin
-  // list and rejects localhost / preview URLs. Edits in Studio show up within ~60s.
-  useCdn: true,
+  // The CDN is on by default, in production and in dev. It serves edits made in Studio after a
+  // minute or two. To see an edit at once while developing, set VITE_SANITY_USE_CDN=false in
+  // .env.local (the live API checks the project's CORS origin list, which includes localhost:3000).
+  useCdn: import.meta.env.VITE_SANITY_USE_CDN !== 'false',
   apiVersion: '2024-01-01',
 })
 

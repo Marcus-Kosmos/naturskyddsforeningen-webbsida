@@ -12,7 +12,7 @@ export default defineType({
   preview: {
     select: {title: 'label', linkType: 'link.linkType', path: 'link.path', url: 'link.url'},
     prepare({title, linkType, path, url}) {
-      return {title, subtitle: linkType === 'external' ? url : path}
+      return {title, subtitle: linkType === 'external' ? url : linkType === 'action' ? 'Öppnar lokalföreningar' : path}
     },
   },
 })

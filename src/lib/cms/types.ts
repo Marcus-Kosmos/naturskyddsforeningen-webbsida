@@ -4,10 +4,12 @@ import type { PortableTextProps } from '@portabletext/react'
 // `vite build` does not type-check, so keep these in sync by hand.
 
 export interface CmsLinkData {
-  linkType?: 'internal' | 'external'
+  linkType?: 'internal' | 'external' | 'action'
   path?: string
   url?: string
   newTab?: boolean
+  /** For `linkType: 'action'`: something the site does instead of navigating. */
+  action?: 'openAssociations'
 }
 
 export interface Cta {
@@ -131,4 +133,118 @@ export interface EventItem {
   location?: string
   type?: string
   link?: CmsLinkData
+}
+
+// ── Homepage ──────────────────────────────────────────────────────────────
+
+export type BlockBackground = 'white' | 'muted' | 'soft' | 'plain'
+
+interface BlockBase {
+  _key: string
+  /** Becomes the element id, so `/#anchor` links to the section. */
+  anchor?: string
+  background?: BlockBackground
+}
+
+export interface FeatureItemData {
+  _key?: string
+  icon?: string
+  title?: string
+  text?: string
+}
+
+export interface BlockCta {
+  _key?: string
+  label: string
+  link?: CmsLinkData
+  style?: 'primary' | 'secondary' | 'text'
+}
+
+export interface FeatureBlock extends BlockBase {
+  _type: 'featureSection'
+  layout?: 'split' | 'stacked'
+  mediaSide?: 'left' | 'right'
+  mediaFirstOnMobile?: boolean
+  eyebrow?: string
+  eyebrowIcon?: string
+  eyebrowImage?: CmsImageData
+  heading: string
+  body?: string
+  images?: CmsImageData[]
+  itemsHeading?: string
+  itemsStyle?: 'list' | 'cards' | 'tiles' | 'bullets'
+  items?: FeatureItemData[]
+  stats?: Stat[]
+  showEvents?: boolean
+  eventsHeading?: string
+  links?: BlockCta[]
+  showShare?: boolean
+}
+
+export interface CardData {
+  _key?: string
+  title: string
+  text?: string
+  icon?: string
+  tone?: 'green' | 'neutral'
+  logoLight?: CmsImageData
+  logoDark?: CmsImageData
+  link?: CmsLinkData
+  linkLabel?: string
+}
+
+export interface CardGridBlock extends BlockBase {
+  _type: 'cardGridSection'
+  variant?: 'icons' | 'logos'
+  eyebrow?: string
+  heading?: string
+  body?: string
+  cards?: CardData[]
+}
+
+export interface ImpactStatData {
+  _key?: string
+  icon?: string
+  value: string
+  label: string
+  description?: string
+}
+
+export interface StatsBlock extends BlockBase {
+  _type: 'statsSection'
+  heading: string
+  body?: string
+  stats?: ImpactStatData[]
+}
+
+export interface LabelGuideBlock extends BlockBase {
+  _type: 'labelGuideSection'
+  eyebrow?: string
+  heading: string
+  body?: string
+  infoHeading?: string
+  infoItems?: Array<{ _key?: string; status: 'recommended' | 'limited' | 'insufficient'; label: string; text?: string }>
+}
+
+export interface NewsEventsBlock extends BlockBase {
+  _type: 'newsEventsSection'
+  newsHeading: string
+  newsLink?: BlockCta
+  newsCount?: number
+  eventsHeading: string
+  eventsCount?: number
+}
+
+export type HomeBlock = FeatureBlock | CardGridBlock | StatsBlock | LabelGuideBlock | NewsEventsBlock
+
+export interface HomeData {
+  heroHeading: string
+  heroSubheading?: string
+  heroPrimaryBtn?: string
+  heroSecondaryBtn?: string
+  heroPrimaryLink?: CmsLinkData
+  heroSecondaryLink?: CmsLinkData
+  heroImages?: CmsImageData[]
+  seo?: { metaTitle?: string; metaDescription?: string }
+  sections?: HomeBlock[]
 }

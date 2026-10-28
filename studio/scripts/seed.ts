@@ -5,16 +5,19 @@
  *   npx sanity exec scripts/seed.ts --with-user-token -- --dry-run
  *   npx sanity exec scripts/seed.ts --with-user-token
  *   npx sanity exec scripts/seed.ts --with-user-token -- --only=site
+ *   npx sanity exec scripts/seed.ts --with-user-token -- --only=home
  *
  * Requires `npx sanity login`. Safe to re-run: existing content is never overwritten.
  */
 import {createContext, onlyModules} from './seed/lib'
+import {seedHome} from './seed/home'
 import {seedNews} from './seed/news'
 import {seedSite} from './seed/site'
 
 const MODULES: Record<string, (ctx: ReturnType<typeof createContext>) => Promise<void>> = {
   site: seedSite,
   news: seedNews,
+  home: seedHome,
 }
 
 async function main() {

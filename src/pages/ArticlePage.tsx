@@ -22,7 +22,7 @@ export function ArticlePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-white dark:bg-slate-900" role="status" aria-label="Hämtar artikeln">
+      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-slate-900" role="status" aria-label="Hämtar artikeln">
         <Loader2 className="w-8 h-8 animate-spin text-[#5A7C50]" />
       </div>
     );
